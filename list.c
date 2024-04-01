@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 
 #include "list.h"
 
@@ -90,7 +91,7 @@ void *remove_head(list_t *list) {
 
 //print list function 
 void print_process(process_t *process) {
-    printf("process_id: %s, arrival time: %d, execution time: %d, state: %d, memory: %d, time-remaining: %d \n", process->process_id, process->arrival_time, process->execution_time, process->state, process->memory, process->time_remain);
+    printf("process_id: %s, arrival time: %d, execution time: %d, state: %d, memory: %d, time-remaining: %d, time-finished: %d \n", process->process_id, process->arrival_time, process->execution_time, process->state, process->memory, process->time_remain, process->time_finished);
 }
 
 // Function to traverse and print the linked list
@@ -149,4 +150,65 @@ int len_list(list_t *list) {
 
     return length;
 
+}
+
+
+//Print Performance Statistics 
+void print_stats(list_t* complete_list, int simul_time) {
+    //print_list(complete_list);
+    // Turnaround time 
+    print_turnaround(complete_list);
+
+    // Time overhead
+    print_time_overhead(complete_list);
+
+    // Makespan 
+    printf("Makespan %d\n", simul_time);
+}
+
+//print average turnaround time 
+// turnaround time is the time elapsed between the arrival and the completion of a process
+void print_turnaround(list_t* process_list) {
+    node_t* current = process_list->head;
+
+    int total_turnaroud_time = 0;
+    int num_processes = 0;
+
+    while(current != NULL) {
+        total_turnaroud_time += (current->data->time_finished - current->data->arrival_time);
+        num_processes++;
+        current = current->next;
+    }
+
+    printf("Turnaround time %d\n", (int)ceil((double)total_turnaroud_time/num_processes));
+
+}
+
+//print maximum and average Time Overhead 
+// Time overhead of a process is defined as its turnaround time divided by its service time.
+void print_time_overhead(list_t* process_list) {
+    node_t* current = process_list->head;
+
+    double total_time_overhead = 0;
+    int num_process = 0;
+
+    double maximum; 
+
+    while(current != NULL) {
+        double current_overhead = ((current->data->time_finished - current->data->arrival_time) / (double)(current->data->execution_time));
+        total_time_overhead += current_overhead;
+        num_process++;
+
+        if (num_process == 0) {
+            maximum =  current_overhead;
+        } else {
+            if (maximum < current_overhead) {
+                maximum = current_overhead;
+            }
+        }
+
+        current = current->next;
+    }
+
+    printf("Time overhead %.2f %.2f\n", maximum, total_time_overhead/num_process);
 }

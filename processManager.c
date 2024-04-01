@@ -9,8 +9,9 @@
 void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
     int simul_time = 0;
     int process_timer = quantum; // timer set to quantum as limit 
-    char *prev_process = "beginning";
+    char *prev_process = "beginning"; //variable that holds the previous process so we can check if the process is the same one that is running in the CPU
 
+    int num_process_left = 0; // the number of processes waiting 
 
 
     //node_t* current = process_list->head;
@@ -21,7 +22,7 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
         // print_list(process_list);
         
         // check if there is any processes that have arrived
-        if (!check_arriving_process(process_list, arrived_list, simul_time)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
+        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
             simul_time++; // if no process has arrived, increase simulation time and wait. 
         }
 
@@ -53,7 +54,7 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
                 //printf("process timer in the smallest while LOOP CHECK: %d\n", process_timer);
                 // add arrived processes to the queue, awaiting to be executed
                 //printf("second arriving process: \n");
-                check_arriving_process(process_list, arrived_list, simul_time);
+                check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
                 
                 current_run->time_remain--;
                 simul_time++;
@@ -63,7 +64,7 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
                 // check if process is finished
                 if(current_run->time_remain == 0) {
                     current_run->state = 3; // change state to FINISHED
-                    process_finish(complete_list, current_run, simul_time );
+                    process_finish(complete_list, current_run, simul_time, &num_process_left);
                     process_timer = quantum;
                     break;
                 }
@@ -74,7 +75,7 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
                 if (process_timer == 0) {
                    // printf("The process timer has reached 0\n");
                     //printf("the third arriving process: \n");
-                    check_arriving_process(process_list, arrived_list, simul_time);
+                    check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
 
 
                     insert_at_foot(arrived_list, current_run);
@@ -89,7 +90,8 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
 
     }
 
-    printf("quantum: %d, Makespan: %d\n", quantum, simul_time);
+    printf("quantum: %d\n", quantum);
+    print_stats(complete_list, simul_time);
 }
 
 
@@ -101,7 +103,7 @@ void first_fit() {
 
 
 // Function to check if there are any processes that have arrived at a particular simulation time
-int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul_time) {
+int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul_time, int* num_process_left) {
 
     // Boolean integer value, if 0, means no incoming arrival process
     // if 1, means there are incoming process that are arriving. 
@@ -122,6 +124,7 @@ int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul
             remove_head(process_list);
 
             // could sort for safe measure
+            *num_process_left = *num_process_left + 1;
 
             bool_incoming = 1;
 
@@ -147,16 +150,20 @@ void start_process(list_t *process_list, list_t *arrived_list, process_t *curren
         strcpy(state_str, "RUNNING");
     }
 
-    printf("%d,%s,process-name=%s,remaining-time=%d  TESTING OUTPUT\n", *current_time, state_str, current_process->process_id, current_process->time_remain);
+    printf("%d,%s,process-name=%s,remaining-time=%d\n", *current_time, state_str, current_process->process_id, current_process->time_remain);
 }
 
 
-void process_finish(list_t* complete_list, process_t* current_process, int simul_time) {
+void process_finish(list_t* complete_list, process_t* current_process, int simul_time, int* num_process_left) {
+
+    *num_process_left = *num_process_left - 1;
+    current_process->time_finished = simul_time;
+    
 
     char finish_state[20] = "FINISHED";
 
     // need to add in number of processes remaining. 
-    printf("%d,%s,process-name=%s,proc-remaining\n", simul_time, finish_state, current_process->process_id);
+    printf("%d,%s,process-name=%s,proc-remaining = %d\n", simul_time, finish_state, current_process->process_id, *num_process_left);
     // insert finished process into finished process list.
     insert_at_foot(complete_list, current_process);
 

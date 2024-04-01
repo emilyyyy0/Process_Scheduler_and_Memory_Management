@@ -11,6 +11,7 @@ typedef struct process {
     int memory; // memory required
     int state; // DEFAULT = 0, READY = 1, RUNNING = 2, FINISHED = 3, EVICTED = 4
     int time_remain; // Remaining time needed in CPU to finish
+    int time_finished; // Time that the process finished (seconds)
     
 } process_t;
 
@@ -72,3 +73,13 @@ int len_list(list_t *list);
 
 // Function that checks if list is empty
 int is_list_empty(list_t *list);
+
+
+// Print the performance statistics
+void print_stats(list_t* complete_list, int simul_time);
+
+// Print average turnaround time 
+void print_turnaround(list_t* process_list);
+
+// Print maximum and average time overhead
+void print_time_overhead(list_t* process_list);

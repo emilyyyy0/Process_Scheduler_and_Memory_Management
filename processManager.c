@@ -10,11 +10,12 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
     int simul_time = 0;
     int process_timer = quantum; // timer set to quantum as limit 
 
-    node_t* current = process_list->head;
+    //node_t* current = process_list->head;
 
     // Iterate through all process list until it is empty. Simulation start 
-    while (current != NULL && simul_time <= 30) {
+    while (process_list->head != NULL) {
         printf("big all process loop simulation time: %d\n", simul_time);
+        print_list(process_list);
         
         // check if there is any processes that have arrived
         if (!check_arriving_process(process_list, arrived_list, simul_time)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
@@ -82,12 +83,7 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
 
     }
 
-
-    printf("infinite memory task \n");
-    //print_list(process_list);
     printf("quantum: %d, simulation time: %d\n", quantum, simul_time);
-
-    printf("length of list: %d\n", len_list(process_list));
 }
 
 
@@ -113,7 +109,7 @@ int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul
 
         if (simul_time >= current->data->arrival_time) {
             // add to arrived_list;
-            insert_at_head(arrived_list, current->data);
+            insert_at_foot(arrived_list, current->data);
             printf("the process that has arrived= %s at time %d \n", current->data->process_id, simul_time);
 
             // then pop the process off of the all process list 

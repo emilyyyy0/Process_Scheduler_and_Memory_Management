@@ -1,0 +1,9 @@
+#define FILENAME "-f" 
+#define QUANTUM "-q"
+#define MEMORY_STRAT "-m" 
+#define MAX_LINE_LEN 100
+#define MAX_PROCESS_LEN 10
+#define INFINITE "infinite"
+#define FIRST_FIT "first-fit"
+#define PAGED "paged"
+#define VIRTUAL "virtual"

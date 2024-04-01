@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
             memory_strat = argv[i+1];
         }
     }
-    printf("The test filename = %s \n the quantum  = %d\n memory strategy = %s \n\n\n", filename, quantum, memory_strat);
+    //printf("The test filename = %s \n the quantum  = %d\n memory strategy = %s \n\n\n", filename, quantum, memory_strat);
 
 
     // List of all processes    

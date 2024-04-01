@@ -89,8 +89,6 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
         //current = current->next;
 
     }
-
-    printf("quantum: %d\n", quantum);
     print_stats(complete_list, simul_time);
 }
 
@@ -158,12 +156,12 @@ void process_finish(list_t* complete_list, process_t* current_process, int simul
 
     *num_process_left = *num_process_left - 1;
     current_process->time_finished = simul_time;
-    
+
 
     char finish_state[20] = "FINISHED";
 
     // need to add in number of processes remaining. 
-    printf("%d,%s,process-name=%s,proc-remaining = %d\n", simul_time, finish_state, current_process->process_id, *num_process_left);
+    printf("%d,%s,process-name=%s,proc-remaining=%d\n", simul_time, finish_state, current_process->process_id, *num_process_left);
     // insert finished process into finished process list.
     insert_at_foot(complete_list, current_process);
 

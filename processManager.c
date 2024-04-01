@@ -9,13 +9,16 @@
 void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
     int simul_time = 0;
     int process_timer = quantum; // timer set to quantum as limit 
+    char *prev_process = "beginning";
+
+
 
     //node_t* current = process_list->head;
 
     // Iterate through all process list until it is empty. Simulation start 
     while (process_list->head != NULL) {
-        printf("big all process loop simulation time: %d\n", simul_time);
-        print_list(process_list);
+        //printf("big all process loop simulation time: %d\n", simul_time);
+        // print_list(process_list);
         
         // check if there is any processes that have arrived
         if (!check_arriving_process(process_list, arrived_list, simul_time)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
@@ -25,26 +28,31 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
 
         // run the process_queue / process manager starts to schedule and give CPU time
         while (arrived_list->head != NULL &&  process_timer >= 0) {
-            printf("\n\nstarting to run process queue\n");
-            printf("The ARRIVED_LIST: \n");
-            print_list(arrived_list);
+            // printf("\n\nstarting to run process queue\n");
+            // printf("The ARRIVED_LIST: \n");
+            //print_list(arrived_list);
 
 
             // if two processes have the same arrival time, the one that was not just executed goes first
             process_t* current_run = remove_head(arrived_list);
             // need to change the state to RUNNING
+            
+            
             current_run->state = 2; // State is changed to running 
-            printf("\nOUTPUT: \n");
-            start_process(process_list, arrived_list, current_run, &simul_time);
-            printf("THE PROCESS CURRENTLY IN CPU: ");
-            print_process(current_run);
+            if (strcmp(prev_process, current_run->process_id) != 0) {
+                start_process(process_list, arrived_list, current_run, &simul_time);
+                prev_process = current_run->process_id;
+            }
+            //start_process(process_list, arrived_list, current_run, &simul_time);
+            //printf("THE PROCESS CURRENTLY IN CPU: ");
+            //print_process(current_run);
 
 
             
             while (1) {
-                printf("process timer in the smallest while LOOP CHECK: %d\n", process_timer);
+                //printf("process timer in the smallest while LOOP CHECK: %d\n", process_timer);
                 // add arrived processes to the queue, awaiting to be executed
-                printf("second arriving process: \n");
+                //printf("second arriving process: \n");
                 check_arriving_process(process_list, arrived_list, simul_time);
                 
                 current_run->time_remain--;
@@ -64,14 +72,12 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
                 
                 // if the quantum time is reached, reset the timer and move onto the next process
                 if (process_timer == 0) {
-                    printf("The process timer has reached 0\n");
-                    printf("the third arriving process: \n");
+                   // printf("The process timer has reached 0\n");
+                    //printf("the third arriving process: \n");
                     check_arriving_process(process_list, arrived_list, simul_time);
 
 
                     insert_at_foot(arrived_list, current_run);
-                   
-                    
 
                     process_timer = quantum;
                     break;
@@ -83,7 +89,7 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
 
     }
 
-    printf("quantum: %d, simulation time: %d\n", quantum, simul_time);
+    printf("quantum: %d, Makespan: %d\n", quantum, simul_time);
 }
 
 
@@ -110,7 +116,7 @@ int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul
         if (simul_time >= current->data->arrival_time) {
             // add to arrived_list;
             insert_at_foot(arrived_list, current->data);
-            printf("the process that has arrived= %s at time %d \n", current->data->process_id, simul_time);
+            //printf("the process that has arrived= %s at time %d \n", current->data->process_id, simul_time);
 
             // then pop the process off of the all process list 
             remove_head(process_list);

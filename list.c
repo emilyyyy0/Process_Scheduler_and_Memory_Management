@@ -214,5 +214,10 @@ void print_time_overhead(list_t* process_list) {
     }
      //printf("numprocess: %d\n", num_process);
 
-    printf("Time overhead %.2f %.2f\n", maximum, total_time_overhead/num_process);
+    // get rid of the rounding error
+     double avg_overhead = total_time_overhead/(double)num_process;
+     avg_overhead = round(avg_overhead * 100) / 100.0;
+     //printf("total_time_overhead: %.2f\n", avg_overhead);
+
+    printf("Time overhead %.2f %.2lf\n", maximum, avg_overhead);
 }

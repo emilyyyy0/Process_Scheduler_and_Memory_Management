@@ -192,7 +192,7 @@ void print_time_overhead(list_t* process_list) {
     double total_time_overhead = 0;
     int num_process = 0;
 
-    double maximum; 
+    double maximum = 0.0;
 
     while(current != NULL) {
         double current_overhead = (double)((current->data->time_finished - current->data->arrival_time) / ((double)(current->data->execution_time)));

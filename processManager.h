@@ -1,7 +1,13 @@
 
+// Task 1: Round Robin Scheduling with Infinite Memory 
 void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum);
 
+// Task 2: Round-Robin Scheduling with Contiguous Memory Allocation
 void first_fit();
+
+// Task 4: Round-Robin with Virtual Memory Allocation
+void virtual(); 
+
 
 
 
@@ -13,3 +19,4 @@ void start_process(list_t *process_list, list_t *arrived_list, process_t *curren
 
 // Process has finished using the CPU. 
 void process_finish(list_t* complete_list, process_t* current_process, int simul_time, int* num_process_left);
+

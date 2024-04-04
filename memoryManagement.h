@@ -1,0 +1,4 @@
+
+#define PAGE_SIZE 4
+#define TOTAL_MEMORY 2048
+#define NUM_PAGES 512

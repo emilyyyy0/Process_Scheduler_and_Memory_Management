@@ -7,6 +7,7 @@
 #include "allocate.h"
 #include "list.h"
 #include "processManager.h"
+#include "memoryManagement.h"
 
 
 int main(int argc, char **argv) {
@@ -98,6 +99,8 @@ int main(int argc, char **argv) {
         infinite(process_list, arrived_list, complete_list, quantum);
     } else if (strcmp(memory_strat, FIRST_FIT) == 0) {
         first_fit();
+    } else if (strcmp(memory_strat, VIRTUAL) == 0) {
+        virtual();
     }
 
 

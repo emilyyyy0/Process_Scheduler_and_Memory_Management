@@ -5,6 +5,7 @@
 
 #include "list.h"
 #include "processManager.h"
+#include "memoryManagement.h"
 
 /* PROBLEM: For quantums > 1, when the remaining time = 1, but we are on a new quantum, we cannot finish the quantum cpu burst is finished.
  * check if simul_time % == 0 and process_timer = 0 have anything to do with this */
@@ -174,4 +175,11 @@ void process_finish(list_t* complete_list, process_t* current_process, int simul
     // insert finished process into finished process list.
     insert_at_foot(complete_list, current_process);
 
+}
+
+
+
+// Task 4: Round-Robin Scheduling with Virtual Memory Allocation 
+void virtual() {
+    printf("Round-Robin Scheduling with Paged Memory Allocation\n");
 }

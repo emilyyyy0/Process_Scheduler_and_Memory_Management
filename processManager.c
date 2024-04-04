@@ -6,6 +6,9 @@
 #include "list.h"
 #include "processManager.h"
 
+/* PROBLEM: For quantums > 1, when the remaining time = 1, but we are on a new quantum, we cannot finish the quantum cpu burst is finished.
+ * check if simul_time % == 0 and process_timer = 0 have anything to do with this */
+
 void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
     int simul_time = 0;
     int process_timer = quantum; // timer set to quantum as limit 
@@ -51,18 +54,25 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
 
             
             while (1) {
-                //printf("process timer in the smallest while LOOP CHECK: %d\n", process_timer);
                 // add arrived processes to the queue, awaiting to be executed
                 //printf("second arriving process: \n");
                 check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
                 
-                current_run->time_remain--;
-                simul_time++;
-                process_timer--;
-                // give process cpu 
+                //current_run->time_remain--; // time remaining that the process needs to run in CPU
+                if ((current_run->time_remain > 0)) {
+                    current_run->time_remain--;
+                }
 
-                // check if process is finished
-                if(current_run->time_remain == 0) {
+                simul_time++; // current simulation time 
+                process_timer--; // the time that the process has been in the CPU
+                
+                //printf("process timer in the smallest while LOOP CHECK: %d\n", process_timer);
+                //printf("current remaining time: %d\n\n", current_run->time_remain);
+                // check if process is finished, only finish the process 
+                //record the time it finished 
+               
+
+                if ((current_run->time_remain == 0) && (process_timer == 0)) {
                     current_run->state = 3; // change state to FINISHED
                     process_finish(complete_list, current_run, simul_time, &num_process_left);
                     process_timer = quantum;
@@ -76,7 +86,6 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
                    // printf("The process timer has reached 0\n");
                     //printf("the third arriving process: \n");
                     check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
-
 
                     insert_at_foot(arrived_list, current_run);
 

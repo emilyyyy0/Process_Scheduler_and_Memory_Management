@@ -195,7 +195,10 @@ void print_time_overhead(list_t* process_list) {
     double maximum; 
 
     while(current != NULL) {
-        double current_overhead = ((current->data->time_finished - current->data->arrival_time) / (double)(current->data->execution_time));
+        double current_overhead = (double)((current->data->time_finished - current->data->arrival_time) / ((double)(current->data->execution_time)));
+        //printf("time finished = %d, arrival_tim = %d, execution time= %d\n ", current->data->time_finished, current->data->arrival_time, current->data->execution_time);
+        //printf("current overhead: %lf\n", current_overhead);
+    
         total_time_overhead += current_overhead;
         num_process++;
 
@@ -209,6 +212,7 @@ void print_time_overhead(list_t* process_list) {
 
         current = current->next;
     }
+     //printf("numprocess: %d\n", num_process);
 
     printf("Time overhead %.2f %.2f\n", maximum, total_time_overhead/num_process);
 }

@@ -38,9 +38,11 @@ void insert_at_foot(list_t *list, process_t *process) {
         // First insert into the list 
         // new becomes only node in the list
         list->head = list->foot = new;
+        new->prev = NULL; // Set prev to NULL for the first node
     } else {
         list->foot->next = new; // old tail connected to "new"
         list->foot = new; // new foot of the list 
+        new->prev = list->foot; // Set prev to the old foot
     }
 
     //printf("inserted at foot %s\n", process->process_id);

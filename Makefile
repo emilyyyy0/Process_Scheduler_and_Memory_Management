@@ -1,5 +1,5 @@
-allocate: allocate.c allocate.h list.c list.h processManager.c processManager.h
-	gcc -Wall -o allocate allocate.c list.c processManager.c
+allocate: allocate.c allocate.h list.c list.h processManager.c processManager.h memoryManagement.c memoryManagement.h
+	gcc -Wall -o allocate allocate.c list.c processManager.c memoryManagement.c
 
 
 run:

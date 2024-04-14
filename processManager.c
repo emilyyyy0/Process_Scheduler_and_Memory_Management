@@ -183,3 +183,66 @@ void process_finish(list_t* complete_list, process_t* current_process, int simul
 void virtual() {
     printf("Round-Robin Scheduling with Paged Memory Allocation\n");
 }
+
+
+
+// Task 3: Round-Robin Scheduling with Paged Memory Allocation 
+void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
+    int simul_time = 0;
+    int process_timer = quantum;
+    int num_process_left = 0;
+
+    // Initialize paged memory structures (page table, frame table, LRU list)
+    initialize_paged_memory();
+
+    while (process_list->head != NULL) {
+        // Check for arriving processes and add them to the arrived list
+        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) {
+            simul_time++;
+        }
+
+        while (arrived_list->head != NULL && process_timer >= 0) {
+            process_t *current_process = remove_head(arrived_list);
+
+            // Attempt to allocate memory for the process
+            if (allocate_pages(current_process)) {
+                current_process->state = RUNNING;
+                start_process(process_list, arrived_list, current_process, &simul_time);
+
+                while (1) {
+                    // Check for arriving processes
+                    check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
+
+                    if (current_process->time_remain > 0) {
+                        current_process->time_remain--;
+                    }
+
+                    simul_time++;
+                    process_timer--;
+
+                    // Process finished execution
+                    if (current_process->time_remain == 0 && process_timer == 0) {
+                        current_process->state = FINISHED;
+                        process_finish(complete_list, current_process, simul_time, &num_process_left);
+                        free_pages(current_process); // Free pages of the finished process
+                        process_timer = quantum;
+                        break;
+                    }
+
+                    // Quantum time reached
+                    if (process_timer == 0) {
+                        check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
+                        insert_at_foot(arrived_list, current_process);
+                        process_timer = quantum;
+                        break;
+                    }
+                }
+            } else {
+                // Memory allocation failed, move process to the back of the queue
+                insert_at_foot(arrived_list, current_process);
+            }
+        }
+    }
+
+    print_stats(complete_list, simul_time);
+}

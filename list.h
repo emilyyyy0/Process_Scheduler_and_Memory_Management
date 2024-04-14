@@ -1,3 +1,6 @@
+#ifndef LIST_H
+#define LIST_H
+
 #define DEFAULT 0
 #define READY 1
 #define RUNNING 2
@@ -22,6 +25,7 @@ typedef struct node node_t;
 struct node {
     process_t *data;
     node_t *next;
+    node_t *prev;
 };
 
 // construct a linked list
@@ -83,3 +87,6 @@ void print_turnaround(list_t* process_list);
 
 // Print maximum and average time overhead
 void print_time_overhead(list_t* process_list);
+
+
+#endif

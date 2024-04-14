@@ -1,0 +1,31 @@
+Data structures
+- Page table - keeps track of which frames are assigned to which process pages. 
+- Frame table - Manage free and occupied frames. 
+- LRU List - has processID and page table entry. When a process is accessed, its node is moved to the head of the list. Eviction starts from tail as it is the least recently used. 
+
+
+initialise_paged_memory() 
+- Initialise page table
+- Intialise frame table
+- create least recently used list
+
+process scheduling loop - iterating through processes. 
+    iterate through arrived processes
+        before allocating process to CPU (RUNNING state), check if there are sufficient enough pages in memory. 
+        check if all pages are allocated using the allocate process
+            allocate_pages - if there are empty frames, allocate them
+                                if more frames are needed, choose the least recently executed process and evict all its pages. 
+                                    if still not enough space, evict all pages of another process. 
+                            once all pages are allocated, return 1 for true and process can run in CPU. 
+        run round robin 
+
+        LRU List Management: whenever a process is allocated OR running 
+            move its corresponding node to the head of the LRU list
+            if node doesn't exist, create a new node and insert at head
+
+        when a process finishes 
+            - free all frames occupied by the process in the frame table 
+            - remove the process's entry fron the page table and the LRU list 
+        
+
+        40 pages, 18 free frames, i need 22 free frames

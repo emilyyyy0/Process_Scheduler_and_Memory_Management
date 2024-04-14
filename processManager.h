@@ -25,4 +25,5 @@ void start_process(list_t *process_list, list_t *arrived_list, process_t *curren
 // Process has finished using the CPU. 
 void process_finish(list_t* complete_list, process_t* current_process, int simul_time, int* num_process_left);
 
+
 #endif 

@@ -7,8 +7,7 @@
 #include "processManager.h"
 #include "memoryManagement.h"
 
-/* PROBLEM: For quantums > 1, when the remaining time = 1, but we are on a new quantum, we cannot finish the quantum cpu burst is finished.
- * check if simul_time % == 0 and process_timer = 0 have anything to do with this */
+
 
 void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
     int simul_time = 0;
@@ -169,6 +168,7 @@ void process_finish(list_t* complete_list, process_t* current_process, int simul
 
 
     char finish_state[20] = "FINISHED";
+    print_process(current_process);
 
     // need to add in number of processes remaining. 
     printf("%d,%s,process-name=%s,proc-remaining=%d\n", simul_time, finish_state, current_process->process_id, *num_process_left);
@@ -187,62 +187,152 @@ void virtual() {
 
 
 // Task 3: Round-Robin Scheduling with Paged Memory Allocation 
+// void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
+//     int simul_time = 0;
+//     int process_timer = quantum;
+//     int num_process_left = 0;
+
+//     // Initialize paged memory structures (page table, frame table, LRU list)
+//     initialise_paged_memory();
+
+//     while (process_list->head != NULL) {
+//         // Check for arriving processes and add them to the arrived list
+//         if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) {
+//             simul_time++;
+//         }
+
+//         while (arrived_list->head != NULL && process_timer >= 0) {
+//             process_t *current_process = remove_head(arrived_list);
+
+//             // Attempt to allocate memory for the process
+//             if (allocate_pages(current_process)) {
+//                 current_process->state = RUNNING;
+//                 start_process(process_list, arrived_list, current_process, &simul_time);
+
+//                 while (1) {
+//                     // Check for arriving processes
+//                     check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
+
+//                     if (current_process->time_remain > 0) {
+//                         current_process->time_remain--;
+//                     }
+
+//                     simul_time++;
+//                     process_timer--;
+
+//                     // Process finished execution
+//                     if (current_process->time_remain == 0 && process_timer == 0) {
+//                         current_process->state = FINISHED;
+//                         process_finish(complete_list, current_process, simul_time, &num_process_left);
+//                         free_pages(current_process); // Free pages of the finished process
+//                         process_timer = quantum;
+//                         break;
+//                     }
+
+//                     // Quantum time reached
+//                     if (process_timer == 0) {
+//                         check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
+//                         insert_at_foot(arrived_list, current_process);
+//                         process_timer = quantum;
+//                         break;
+//                     }
+//                 }
+//             } else {
+//                 // Memory allocation failed, move process to the back of the queue
+//                 insert_at_foot(arrived_list, current_process);
+//             }
+//         }
+//     }
+
+//     print_stats(complete_list, simul_time);
+// }
+
 void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
     int simul_time = 0;
-    int process_timer = quantum;
-    int num_process_left = 0;
+    int process_timer = quantum; // timer set to quantum as limit 
+    char *prev_process = "beginning"; //variable that holds the previous process so we can check if the process is the same one that is running in the CPU
+    int num_process_left = 0; // the number of processes waiting 
 
-    // Initialize paged memory structures (page table, frame table, LRU list)
-    initialize_paged_memory();
+    page_table_entry_t page_table[NUM_PAGES];
+    int frame_table[TOTAL_MEMORY / PAGE_SIZE];
+    list_t *lru_list = make_empty_list();
+    
+    initialise_paged_memory(page_table, frame_table); // Initialise paged memory structures (page table, frame table)
+    
 
+
+    // Iterate through all process list until it is empty. Simulation start 
     while (process_list->head != NULL) {
-        // Check for arriving processes and add them to the arrived list
-        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) {
-            simul_time++;
+        // print_list(process_list);
+        
+        // check if there is any processes that have arrived
+        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
+            simul_time++; // if no process has arrived, increase simulation time and wait. 
         }
 
-        while (arrived_list->head != NULL && process_timer >= 0) {
-            process_t *current_process = remove_head(arrived_list);
 
-            // Attempt to allocate memory for the process
-            if (allocate_pages(current_process)) {
-                current_process->state = RUNNING;
-                start_process(process_list, arrived_list, current_process, &simul_time);
+        // run the process_queue / process manager starts to schedule and give CPU time
+        while (arrived_list->head != NULL &&  process_timer >= 0) {
+            
+            // if two processes have the same arrival time, the one that was not just executed goes first
+            process_t* current_run = remove_head(arrived_list);
+            
+            // Allocate memory for the process 
+            if (allocate_pages(current_run, page_table, frame_table, lru_list)) {
+                current_run->state = RUNNING; // State is changed to running 
+                if (strcmp(prev_process, current_run->process_id) != 0) {
+                    start_process(process_list, arrived_list, current_run, &simul_time); // prints to stdout
+                    prev_process = current_run->process_id;
+                }
+                
+            }
+            
+            // current_run->state = RUNNING; // State is changed to running 
+            // if (strcmp(prev_process, current_run->process_id) != 0) {
+            //     start_process(process_list, arrived_list, current_run, &simul_time); // prints to stdout
+            //     prev_process = current_run->process_id;
+            // }
 
-                while (1) {
-                    // Check for arriving processes
+            
+            while (1) {
+                // add arrived processes to the queue, awaiting to be executed
+                check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
+                
+                //current_run->time_remain--; // time remaining that the process needs to run in CPU
+                if ((current_run->time_remain > 0)) {
+                    current_run->time_remain--;
+                }
+
+                simul_time++; // current simulation time 
+                process_timer--; // the time that the process has been in the CPU
+
+
+                if ((current_run->time_remain == 0) && (process_timer == 0)) {
+                    current_run->state = 3; // change state to FINISHED
+                
+                    //process_finish(complete_list, current_run, simul_time, &num_process_left);
+
+                    free_pages(current_run, page_table, frame_table, lru_list);
+                    //print_process(tmp);
+                    process_finish(complete_list, current_run, simul_time, &num_process_left);
+                    process_timer = quantum;
+                    break;
+                }
+
+
+                
+                // if the quantum time is reached, reset the timer and move onto the next process
+                if (process_timer == 0) {
                     check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
 
-                    if (current_process->time_remain > 0) {
-                        current_process->time_remain--;
-                    }
+                    insert_at_foot(arrived_list, current_run);
 
-                    simul_time++;
-                    process_timer--;
-
-                    // Process finished execution
-                    if (current_process->time_remain == 0 && process_timer == 0) {
-                        current_process->state = FINISHED;
-                        process_finish(complete_list, current_process, simul_time, &num_process_left);
-                        free_pages(current_process); // Free pages of the finished process
-                        process_timer = quantum;
-                        break;
-                    }
-
-                    // Quantum time reached
-                    if (process_timer == 0) {
-                        check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
-                        insert_at_foot(arrived_list, current_process);
-                        process_timer = quantum;
-                        break;
-                    }
+                    process_timer = quantum;
+                    break;
                 }
-            } else {
-                // Memory allocation failed, move process to the back of the queue
-                insert_at_foot(arrived_list, current_process);
             }
         }
-    }
 
+    }
     print_stats(complete_list, simul_time);
 }

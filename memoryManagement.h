@@ -14,11 +14,29 @@ typedef struct {
     int frame_number;    // Frame number allocated to the page
 } page_table_entry_t;
 
-// Function prototypes 
-void initialize_paged_memory();
-int allocate_pages(process_t *process);
-void free_pages(process_t *process);
-void evict_lru_pages(int num_frames_needed);
-void update_lru(process_t *process);
+// Function to initialise data structures for paged memory. Page table and frame table
+void initialise_paged_memory(page_table_entry_t *page_table, int *frame_table);
+
+int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lry_list);
+
+void evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list);
+
+void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list);
+
+
+// Update the lru
+void update_lru(process_t *process, list_t *lru_list);
+
+// Print page table
+void print_page_table(page_table_entry_t *page_table);
+
+// Print frame table
+void print_frame_table(int *frame_table);
+
+// Print the lru_list
+void print_lru_list(list_t *lru_list);
+
+
+
 
 #endif 

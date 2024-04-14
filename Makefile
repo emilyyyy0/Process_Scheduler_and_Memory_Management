@@ -3,7 +3,7 @@ allocate: allocate.c allocate.h list.c list.h processManager.c processManager.h 
 
 
 run:
-	./allocate -f cases/task1/spec.txt -q 1 -m infinite
+	./allocate -f cases/task3/simple-alloc.txt -q 3 -m paged
 	
 clean: 
 	rm -f allocate allocate.o list.o processManager.o

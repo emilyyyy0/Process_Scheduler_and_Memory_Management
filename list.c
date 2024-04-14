@@ -81,8 +81,11 @@ void *remove_head(list_t *list) {
     list->head = list->head->next; // Links "head" to the second node
     if (list->head == NULL) {       // If the list becomes empty 
         list->foot = NULL;     //   Then the "tail" must also be set to NULL
+    } else {
+        list->head->prev = NULL; // set prev of new head to NULL
     }
-    //free(tmp);                    // Free the removed node
+    
+    free(tmp);                    // Free the removed node
     //printf("remove_head function works");
     //print_process(p);
 

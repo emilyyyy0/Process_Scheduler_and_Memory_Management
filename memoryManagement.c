@@ -34,6 +34,8 @@ void *initialise_page_table(void) {
 }
 
 
+
+
 // Allocate pages for a process
 int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list) {
     // first check if there are enough empty frames
@@ -68,7 +70,10 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
                 if (frame_table[frame_number] == 0) {
                     // Allocate frame and update page table
 
-                    page_table[num_frames_allocated].process_id = strdup(process->process_id);
+                    allocate_process_id_page_table(&page_table[num_frames_allocated], process);
+                    printf("Frame allocated for process_id at address: %p\n", (void *)page_table[num_frames_allocated].process_id);
+                    printf("process process_id at address: %p\n", (void *)process->process_id);
+
                     page_table[num_frames_allocated].page_number = num_frames_allocated;
                     page_table[num_frames_allocated].frame_number = frame_number;
                     num_frames_allocated++;
@@ -197,7 +202,7 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
         }
 
         if (strcmp(page_table[i].process_id, process->process_id) == 0) {
-            printf("%d,EVICTED,evicted-frames=[%d]\n", process->time_finished, page_table[i].frame_number); // CHANGE THIS PRINT STATEMENT
+            printf("%d,EVICTED,evicted-frames=[%d], the evicted in free page function\n", process->time_finished, page_table[i].frame_number); // CHANGE THIS PRINT STATEMENT
 
             frame_table[page_table[i].frame_number] = 0; // Mark frame as free
             page_table[i].process_id = NULL; // Mark page as unallocated
@@ -238,6 +243,32 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
     }
 
 
+}
+
+
+
+// Allocate process_id in page_table_entry_t 
+void allocate_process_id_page_table(page_table_entry_t *entry, process_t *process) {
+    char *id = process->process_id;
+    if (entry == NULL ||  id == NULL) {
+        return; // Safety check
+    }
+
+    // Free existing process_id if it exists
+    if (entry->process_id != NULL) {
+        free(entry->process_id);
+        entry->process_id = NULL; // Avoid dangling pointers
+    }
+
+    // Allocate memory for the new process_id
+    entry->process_id = malloc(strlen(id) + 1); // +1 for the null terminator
+    if (entry->process_id == NULL) {
+        fprintf(stderr, "Failed to allocate memory for process_id.\n");
+        return;
+    }
+
+    // Copy the new process_id into the allocated memory
+    strcpy(entry->process_id, id);
 }
 
 
@@ -285,5 +316,24 @@ void print_lru_list(list_t *lru_list) {
         current = current->next;
     }
     printf("\n");
+
+}
+
+
+void free_page_table(page_table_entry_t *page_table) {
+    if (page_table == NULL) {
+        return; // If the pointer is NULL, there's nothing to free
+    }
+
+    // Free each dynamically allocated process_id
+    for (int i = 0; i < NUM_PAGES; i++) {
+        if (page_table[i].process_id != NULL) {
+            free(page_table[i].process_id);
+        }
+    }
+
+    // Free the page table itself
+    printf("freeing the page table\n");
+    free(page_table);
 
 }

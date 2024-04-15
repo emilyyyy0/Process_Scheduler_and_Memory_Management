@@ -32,6 +32,10 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
 // Update the lru
 void update_lru(process_t *process, list_t *lru_list);
 
+// Allocate process_id to page_table_entry process id to avoid same memory address
+void allocate_process_id_page_table(page_table_entry_t *entry, process_t *process);
+
+
 // Print page table
 void print_page_table(page_table_entry_t *page_table);
 
@@ -41,7 +45,8 @@ void print_frame_table(int *frame_table);
 // Print the lru_list
 void print_lru_list(list_t *lru_list);
 
-
+// Free page table
+void free_page_table(page_table_entry_t *page_table);
 
 
 #endif 

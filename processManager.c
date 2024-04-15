@@ -334,5 +334,7 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
         }
 
     }
+    // Free page table
+    free_page_table(page_table);
     print_stats(complete_list, simul_time);
 }

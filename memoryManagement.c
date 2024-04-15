@@ -53,6 +53,11 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
 
     //printf("num pages needed: %d\n", num_pages_needed);
 
+    // NEED TO CHECK IF PROCESS HAS ALREADY BEEN ALLOCATED
+    // if (process->state == RUNNING) {
+    //     return 1;
+    // }
+
 
     int num_free_frames = 0;
     int num_evicted = 0;
@@ -375,6 +380,17 @@ void print_page_table(page_table_entry_t *page_table) {
     printf("numpages = %d, NUM_PAGES = %d, memusage = %lf\n", numPage, NUM_PAGES, mem_usage);
     printf("\n");
 }
+
+
+// int check_process_allocated(process_t* process, page_table_entry_t *page_table) {
+//     for (int i = 0; i < NUM_PAGES; i++) {
+//         if (page_table[i].process_id != NULL && 
+//             strcmp(page_table[i].process_id, process->process_id) == 0) {
+//             return 1; // Process has at least one page allocated
+//         }
+//     }
+//     return 0; // Process has no pages allocated 
+// }
 
 
 void print_frame_table(int *frame_table) {

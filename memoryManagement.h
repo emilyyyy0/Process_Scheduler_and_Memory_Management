@@ -38,6 +38,10 @@ void allocate_process_id_page_table(page_table_entry_t *entry, process_t *proces
 // Copy the process to put into LRU_list
 process_t *copy_process(process_t *process);
 
+// Function to check if process has already been allocated paged memory
+//int check_process_allocated(process_t* process, page_table_entry_t *page_table);
+
+
 
 // Print page table
 void print_page_table(page_table_entry_t *page_table);

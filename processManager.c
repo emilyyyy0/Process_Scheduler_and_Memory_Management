@@ -253,11 +253,11 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
     char *prev_process = "beginning"; //variable that holds the previous process so we can check if the process is the same one that is running in the CPU
     int num_process_left = 0; // the number of processes waiting 
 
-    page_table_entry_t page_table[NUM_PAGES];
+    // Initialise paged memory structures (page table, frame table)
+    page_table_entry_t* page_table = initialise_page_table();
     int frame_table[TOTAL_MEMORY / PAGE_SIZE];
     list_t *lru_list = make_empty_list();
-    
-    initialise_paged_memory(page_table, frame_table); // Initialise paged memory structures (page table, frame table)
+    initialise_frame_table(frame_table); 
     
 
 

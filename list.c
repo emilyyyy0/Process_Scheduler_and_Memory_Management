@@ -226,3 +226,13 @@ void print_time_overhead(list_t* process_list) {
 
     printf("Time overhead %.2f %.2lf\n", maximum, avg_overhead);
 }
+
+
+// Function to perform division and always round up
+int divide_and_round_up(int dividend, int divisor) {
+    if (divisor == 0) {
+        fprintf(stderr, "Error: Division by zero.\n");
+        return -1; // or handle error more appropriately
+    }
+    return (dividend + divisor - 1) / divisor;
+}

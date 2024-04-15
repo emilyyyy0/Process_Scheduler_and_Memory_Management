@@ -88,5 +88,8 @@ void print_turnaround(list_t* process_list);
 // Print maximum and average time overhead
 void print_time_overhead(list_t* process_list);
 
+// Dividing and round up 
+int divide_and_round_up(int dividend, int divisor);
+
 
 #endif

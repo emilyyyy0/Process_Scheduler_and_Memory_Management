@@ -257,6 +257,8 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
     int frame_table[TOTAL_MEMORY / PAGE_SIZE];
     list_t *lru_list = make_empty_list();
     initialise_frame_table(frame_table); 
+
+    int frames_allocated = 0;
     
 
 
@@ -276,13 +278,14 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
             process_t* current_run = remove_head(arrived_list);
             
             // Allocate memory for the process 
-            if (allocate_pages(current_run, page_table, frame_table, lru_list)) {
+            if (allocate_pages(current_run, page_table, frame_table, lru_list, &frames_allocated)) {
                 current_run->state = RUNNING; // State is changed to running 
                 if (strcmp(prev_process, current_run->process_id) != 0) {
-                    start_process_paged(process_list, arrived_list, current_run, &simul_time, page_table); // prints to stdout
+                    start_process_paged(process_list, arrived_list, current_run, &simul_time, page_table, frames_allocated); // prints to stdout
                     //print_page_table(page_table);
                     prev_process = current_run->process_id;
                 }
+                //printf("frames allocated: %d\n", frames_allocated);
                 
             }
             
@@ -312,7 +315,7 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
                 
                     //process_finish(complete_list, current_run, simul_time, &num_process_left);
 
-                    free_pages(current_run, page_table, frame_table, lru_list, simul_time);
+                    free_pages(current_run, page_table, frame_table, lru_list, simul_time, &frames_allocated);
                     //print_process(tmp);
                     process_finish(complete_list, current_run, simul_time, &num_process_left);
                     process_timer = quantum;
@@ -341,7 +344,7 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
 
 
 // Start process for task 3
-void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *current_process, int* current_time, page_table_entry_t *page_table) {
+void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *current_process, int* current_time, page_table_entry_t *page_table, int total_num_frames_current) {
     int state = current_process->state;
     char *state_str = malloc(20 * sizeof(char));
 
@@ -354,8 +357,9 @@ void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *
     }
 
 
+    int memUsage = divide_and_round_up( total_num_frames_current * 100 ,NUM_PAGES);
     
-    printf("%d,%s,process-name=%s,remaining-time=%d, mem-usage=,mem-frames=[", *current_time, state_str, current_process->process_id, current_process->time_remain);
+    printf("%d,%s,process-name=%s,remaining-time=%d, mem-usage=%d%%,mem-frames=[", *current_time, state_str, current_process->process_id, current_process->time_remain, memUsage);
     for (int i = 0; i < NUM_PAGES; i++) {
         
         if (page_table[i].process_id != NULL) {

@@ -144,7 +144,7 @@ int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul
 
 }
 
-// Start current process, print the output.
+// Start task 1 current process, print the output.
 void start_process(list_t *process_list, list_t *arrived_list, process_t *current_process, int* current_time) {
     int state = current_process->state;
     char *state_str = malloc(20 * sizeof(char));
@@ -157,6 +157,7 @@ void start_process(list_t *process_list, list_t *arrived_list, process_t *curren
         strcpy(state_str, "RUNNING");
     }
 
+    
     printf("%d,%s,process-name=%s,remaining-time=%d\n", *current_time, state_str, current_process->process_id, current_process->time_remain);
 }
 
@@ -272,7 +273,8 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
             if (allocate_pages(current_run, page_table, frame_table, lru_list)) {
                 current_run->state = RUNNING; // State is changed to running 
                 if (strcmp(prev_process, current_run->process_id) != 0) {
-                    start_process(process_list, arrived_list, current_run, &simul_time); // prints to stdout
+                    start_process_paged(process_list, arrived_list, current_run, &simul_time, page_table); // prints to stdout
+                    //print_page_table(page_table);
                     prev_process = current_run->process_id;
                 }
                 
@@ -328,4 +330,36 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
     // Free page table
     free_page_table(page_table);
     print_stats(complete_list, simul_time);
+}
+
+
+// Start process for task 3
+void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *current_process, int* current_time, page_table_entry_t *page_table) {
+    int state = current_process->state;
+    char *state_str = malloc(20 * sizeof(char));
+
+    if (state == 0) {
+        strcpy(state_str,"DEFAULT");
+    } else if (state == 1) {
+        strcpy(state_str,"READY");
+    } else if (state == 2) {
+        strcpy(state_str, "RUNNING");
+    }
+
+
+    
+    printf("%d,%s,process-name=%s,remaining-time=%d, mem-usage=,mem-frames=[", *current_time, state_str, current_process->process_id, current_process->time_remain);
+    for (int i = 0; i < NUM_PAGES; i++) {
+        
+        if (page_table[i].process_id != NULL) {
+            if (i == 0) {
+                printf("%d",page_table[i].frame_number); 
+                continue;
+            }
+            printf(",");
+            printf("%d",page_table[i].frame_number); 
+        }
+        
+    }
+    printf("]\n");
 }

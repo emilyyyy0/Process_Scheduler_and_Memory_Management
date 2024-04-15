@@ -334,18 +334,23 @@ void print_page_table(page_table_entry_t *page_table) {
     printf("Page Num | Process ID | Frame Num\n");
     printf("---------|------------|----------\n");
 
+    int numPage = 0;
+
     for (int i = 0; i < NUM_PAGES; i++) {
-        // if (page_table[i].process_id != NULL) {
-        //     printf("%8d | %10s | %9d\n", 
-        //            page_table[i].page_number, 
-        //            page_table[i].process_id, 
-        //            page_table[i].frame_number); 
-        // }
-         printf("%8d | %10s | %9d\n", 
-            page_table[i].page_number, 
-            page_table[i].process_id, 
-            page_table[i].frame_number); 
+        if (page_table[i].process_id != NULL) {
+            printf("%8d | %10s | %9d\n", 
+                   page_table[i].page_number, 
+                   page_table[i].process_id, 
+                   page_table[i].frame_number); 
+            numPage++;
+        }
+        //  printf("%8d | %10s | %9d\n", 
+        //     page_table[i].page_number, 
+        //     page_table[i].process_id, 
+        //     page_table[i].frame_number); 
     }
+    double mem_usage = (((double)(numPage / (double) NUM_PAGES)) * 100);
+    printf("numpages = %d, NUM_PAGES = %d, memusage = %lf\n", numPage, NUM_PAGES, mem_usage);
     printf("\n");
 }
 

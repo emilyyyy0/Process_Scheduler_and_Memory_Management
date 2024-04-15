@@ -168,7 +168,7 @@ void process_finish(list_t* complete_list, process_t* current_process, int simul
 
 
     char finish_state[20] = "FINISHED";
-    print_process(current_process);
+    //print_process(current_process);
 
     // need to add in number of processes remaining. 
     printf("%d,%s,process-name=%s,proc-remaining=%d\n", simul_time, finish_state, current_process->process_id, *num_process_left);

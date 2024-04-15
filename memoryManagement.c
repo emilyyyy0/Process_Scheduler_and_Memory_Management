@@ -12,7 +12,7 @@ void initialise_frame_table(int *frame_table) {
     for (int i = 0; i < TOTAL_MEMORY / PAGE_SIZE; i++) {
         frame_table[i] = 0; // 0 indicates free
     }
-    printf("initialise frame table function working\n");
+    //printf("initialise frame table function working\n");
 }
 
 // Initialise page table
@@ -71,8 +71,8 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
                     // Allocate frame and update page table
 
                     allocate_process_id_page_table(&page_table[num_frames_allocated], process);
-                    printf("Frame allocated for process_id at address: %p\n", (void *)page_table[num_frames_allocated].process_id);
-                    printf("process process_id at address: %p\n", (void *)process->process_id);
+                    //printf("Frame allocated for process_id at address: %p\n", (void *)page_table[num_frames_allocated].process_id);
+                    //printf("process process_id at address: %p\n", (void *)process->process_id);
 
                     page_table[num_frames_allocated].page_number = num_frames_allocated;
                     page_table[num_frames_allocated].frame_number = frame_number;
@@ -176,9 +176,16 @@ void update_lru(process_t *process, list_t *lru_list) {
     } else {
         // If the process is not in the list, create a new node and insert it at the head
         node_t *new_node = (node_t*)malloc(sizeof(node_t));
-        new_node->data = process;
+        if (new_node == NULL) {
+            fprintf(stderr, "Failed to allocate memory for new node.\n");
+            return;
+        }
+
+        // Copy the process
+        new_node->data = copy_process(process);
         new_node->next = lru_list->head;
-        new_node->prev = NULL; // New head, so prev is NULL
+        new_node->prev = NULL;
+        
 
         if (lru_list->head != NULL) {
             lru_list->head->prev = new_node; // Update prev of old head
@@ -194,7 +201,7 @@ void update_lru(process_t *process, list_t *lru_list) {
 //Free pages of a process
 void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list) {
     // Iterate through page table and free frames. 
-    printf("free page function\n");
+    //printf("free page function\n");
     for (int i = 0; i < NUM_PAGES; i++) {
 
         if (page_table[i].process_id == NULL) {
@@ -270,6 +277,43 @@ void allocate_process_id_page_table(page_table_entry_t *entry, process_t *proces
     // Copy the new process_id into the allocated memory
     strcpy(entry->process_id, id);
 }
+
+
+
+// Copy process to put into LRU, we do this to avoid memory errors.
+process_t *copy_process(process_t *process) {
+    if (process == NULL) {
+        return NULL; // Safety 
+    }
+
+    process_t *copy = (process_t *)malloc(sizeof(process_t));
+    if (copy == NULL) {
+        return NULL; // Safety
+    }
+
+    // Copy all fields 
+    copy->arrival_time = process->arrival_time;
+    copy->execution_time = process->execution_time;
+    copy->memory = process->memory; 
+    copy->state = process->state;
+    copy->time_remain = process->time_remain;
+    copy->time_finished = process->time_finished;
+
+    // copy process_id string
+    if (process->process_id != NULL) {
+        copy->process_id = malloc(strlen(process->process_id) + 1);
+        if (copy->process_id != NULL) {
+            strcpy(copy->process_id, process->process_id);
+        }
+    } else {
+        copy->process_id = NULL;
+    
+    }
+
+    return copy;
+
+}
+
 
 
 void print_page_table(page_table_entry_t *page_table) {

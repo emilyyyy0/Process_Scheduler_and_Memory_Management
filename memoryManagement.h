@@ -35,6 +35,9 @@ void update_lru(process_t *process, list_t *lru_list);
 // Allocate process_id to page_table_entry process id to avoid same memory address
 void allocate_process_id_page_table(page_table_entry_t *entry, process_t *process);
 
+// Copy the process to put into LRU_list
+process_t *copy_process(process_t *process);
+
 
 // Print page table
 void print_page_table(page_table_entry_t *page_table);

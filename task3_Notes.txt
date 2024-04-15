@@ -29,3 +29,6 @@ process scheduling loop - iterating through processes.
         
 
         40 pages, 18 free frames, i need 22 free frames
+
+
+        CURRENT PROBLEM: LRU needs to not alter process, copy in a new process. 

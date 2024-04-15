@@ -26,7 +26,7 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
 
 void evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list);
 
-void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list);
+void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time);
 
 
 // Update the lru

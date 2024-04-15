@@ -199,26 +199,38 @@ void update_lru(process_t *process, list_t *lru_list) {
 }
 
 //Free pages of a process
-void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list) {
+void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time) {
     // Iterate through page table and free frames. 
     //printf("free page function\n");
-    for (int i = 0; i < NUM_PAGES; i++) {
 
+    char frame_numbers[256] = {0};  // Buffer to store frame numbers
+    int first = 1;  // Flag to help format with commas
+
+
+    for (int i = 0; i < NUM_PAGES; i++) {
         if (page_table[i].process_id == NULL) {
-            break;
+            break;  // No more entries to check
         }
 
         if (strcmp(page_table[i].process_id, process->process_id) == 0) {
-            printf("%d,EVICTED,evicted-frames=[%d], the evicted in free page function\n", process->time_finished, page_table[i].frame_number); // CHANGE THIS PRINT STATEMENT
+            if (!first) {
+                strcat(frame_numbers, ",");  // Add a comma before the next number except for the first
+            }
+            char frame_number_str[10];  // Buffer for the current frame number
+            sprintf(frame_number_str, "%d", page_table[i].frame_number);
+            strcat(frame_numbers, frame_number_str);  // Append current frame number to the list
 
             frame_table[page_table[i].frame_number] = 0; // Mark frame as free
-            page_table[i].process_id = NULL; // Mark page as unallocated
+            page_table[i].process_id = NULL;  // Mark page as unallocated
             page_table[i].page_number = -1;
             page_table[i].frame_number = -1;
 
-
+            first = 0;  // Update flag after the first frame number is added
         }
-    
+    }
+
+    if (!first) {  // Only print if at least one frame was evicted
+        printf("%d,EVICTED,evicted-frames=[%s]\n", simul_time, frame_numbers);
     }
 
     // Remove process from LRU list
@@ -226,7 +238,7 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
     node_t *previous = NULL;
     while (current != NULL) {
 
-        if (current->data->process_id == process->process_id) {
+        if (current->data->process_id == process->process_id) { // could potentially cause problems
             if (previous == NULL) {
                 lru_list->head = current->next;
                 if (lru_list->head != NULL) {
@@ -377,7 +389,7 @@ void free_page_table(page_table_entry_t *page_table) {
     }
 
     // Free the page table itself
-    printf("freeing the page table\n");
+    //printf("freeing the page table\n");
     free(page_table);
 
 }

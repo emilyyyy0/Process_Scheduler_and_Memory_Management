@@ -348,6 +348,10 @@ void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *
     int state = current_process->state;
     char *state_str = malloc(20 * sizeof(char));
 
+    char frame_numbers[256] = {0};  // Buffer to store frame numbers
+    int first = 1;  // Flag to help format with commas
+
+
     if (state == 0) {
         strcpy(state_str,"DEFAULT");
     } else if (state == 1) {
@@ -359,18 +363,34 @@ void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *
 
     int memUsage = divide_and_round_up( total_num_frames_current * 100 ,NUM_PAGES);
     
-    printf("%d,%s,process-name=%s,remaining-time=%d, mem-usage=%d%%,mem-frames=[", *current_time, state_str, current_process->process_id, current_process->time_remain, memUsage);
+    //printf("%d,%s,process-name=%s,remaining-time=%d, mem-usage=%d%%,mem-frames=[", *current_time, state_str, current_process->process_id, current_process->time_remain, memUsage);
     for (int i = 0; i < NUM_PAGES; i++) {
         
         if ((page_table[i].process_id != NULL) && (strcmp(page_table[i].process_id, current_process->process_id) == 0)) {
-            if (i == 0) {
-                printf("%d",page_table[i].frame_number); 
-                continue;
+            if (!first) {
+                strcat(frame_numbers, ",");  // Add a comma before the next number except for the first
             }
-            printf(",");
-            printf("%d",page_table[i].frame_number); 
+
+            char frame_number_str[10];  // Buffer for the current frame number
+            sprintf(frame_number_str, "%d", page_table[i].frame_number);
+            strcat(frame_numbers, frame_number_str);  // Append current frame number to the list
+
+            first = 0; // Update flag after the first frame number is added. 
+
+            
+            // if (i == 0) {
+            //     printf("%d",page_table[i].frame_number); 
+            //     continue;
+            // }
+            // printf(",");
+            // printf("%d",page_table[i].frame_number); 
         }
         
     }
-    printf("]\n");
+
+    if (!first) {  // Only print if at least one frame was evicted
+        printf("%d,%s,process-name=%s,remaining-time=%d,mem-usage=%d%%,mem-frames=[%s]\n", *current_time, state_str, current_process->process_id, current_process->time_remain, memUsage, frame_numbers);
+
+    }
+    
 }

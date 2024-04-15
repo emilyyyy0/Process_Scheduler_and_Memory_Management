@@ -111,6 +111,7 @@ void first_fit() {
 
 // Function to check if there are any processes that have arrived at a particular simulation time
 int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul_time, int* num_process_left) {
+    //print_list(process_list);
 
     // Boolean integer value, if 0, means no incoming arrival process
     // if 1, means there are incoming process that are arriving. 
@@ -119,8 +120,10 @@ int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul
 
     // iterate through process_list, if simul_time >= current process, pop the process from process_list and push onto arrived_list.
     node_t *current = process_list->head; // Start from the head of the list
+    node_t *next = NULL;
 
     while (current != NULL) { 
+        next = current->next; // Save the next node before potentially modifying the list
 
         if (simul_time >= current->data->arrival_time) {
             // add to arrived_list;
@@ -134,12 +137,16 @@ int check_arriving_process(list_t *process_list, list_t *arrived_list, int simul
             *num_process_left = *num_process_left + 1;
 
             bool_incoming = 1;
+            // printf("checking arrived processes: ");
+            // print_process(current->data);
 
         }
-        current = current->next; 
+        
+        //current = current->next; 
+        current = next; // Move to the next node, which we saved before any potential modification
+        
         
     }
-
     return bool_incoming;
 
 }
@@ -265,7 +272,6 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
 
         // run the process_queue / process manager starts to schedule and give CPU time
         while (arrived_list->head != NULL &&  process_timer >= 0) {
-            
             // if two processes have the same arrival time, the one that was not just executed goes first
             process_t* current_run = remove_head(arrived_list);
             
@@ -290,6 +296,7 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
             while (1) {
                 // add arrived processes to the queue, awaiting to be executed
                 check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
+
                 
                 //current_run->time_remain--; // time remaining that the process needs to run in CPU
                 if ((current_run->time_remain > 0)) {

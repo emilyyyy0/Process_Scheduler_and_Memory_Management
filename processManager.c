@@ -362,7 +362,7 @@ void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *
     printf("%d,%s,process-name=%s,remaining-time=%d, mem-usage=%d%%,mem-frames=[", *current_time, state_str, current_process->process_id, current_process->time_remain, memUsage);
     for (int i = 0; i < NUM_PAGES; i++) {
         
-        if (page_table[i].process_id != NULL) {
+        if ((page_table[i].process_id != NULL) && (strcmp(page_table[i].process_id, current_process->process_id) == 0)) {
             if (i == 0) {
                 printf("%d",page_table[i].frame_number); 
                 continue;

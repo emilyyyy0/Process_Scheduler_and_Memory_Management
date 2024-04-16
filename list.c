@@ -38,9 +38,11 @@ void insert_at_foot(list_t *list, process_t *process) {
         // First insert into the list 
         // new becomes only node in the list
         list->head = list->foot = new;
+        new->prev = NULL; // Set prev to NULL for the first node
     } else {
         list->foot->next = new; // old tail connected to "new"
         list->foot = new; // new foot of the list 
+        new->prev = list->foot; // Set prev to the old foot
     }
 
     //printf("inserted at foot %s\n", process->process_id);
@@ -79,8 +81,11 @@ void *remove_head(list_t *list) {
     list->head = list->head->next; // Links "head" to the second node
     if (list->head == NULL) {       // If the list becomes empty 
         list->foot = NULL;     //   Then the "tail" must also be set to NULL
+    } else {
+        list->head->prev = NULL; // set prev of new head to NULL
     }
-    //free(tmp);                    // Free the removed node
+    
+    free(tmp);                    // Free the removed node
     //printf("remove_head function works");
     //print_process(p);
 
@@ -220,4 +225,14 @@ void print_time_overhead(list_t* process_list) {
      //printf("total_time_overhead: %.2f\n", avg_overhead);
 
     printf("Time overhead %.2f %.2lf\n", maximum, avg_overhead);
+}
+
+
+// Function to perform division and always round up
+int divide_and_round_up(int dividend, int divisor) {
+    if (divisor == 0) {
+        fprintf(stderr, "Error: Division by zero.\n");
+        return -1; // or handle error more appropriately
+    }
+    return (dividend + divisor - 1) / divisor;
 }

@@ -133,7 +133,7 @@ int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *
 
         // Evict all pages of the LRU process
         for (int i = 0; i < NUM_PAGES; i++) {
-            if (strcmp(page_table[i].process_id, lru_process->process_id) == 0) {
+            if ((page_table[i].process_id != NULL) && (strcmp(page_table[i].process_id, lru_process->process_id) == 0)) {
                 // update frame table
                 int frame_to_free = page_table[i].frame_number; 
                 frame_table[frame_to_free] = 0; // Mark frame as free. 

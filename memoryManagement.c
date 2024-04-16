@@ -4,6 +4,8 @@
 #include "memoryManagement.h"
 #include "list.h"
 
+/******************************************************************** INITIALISE FUNCTIONS ****************************************************************************************************/
+
 
 // Initialize frame table
 void initialise_frame_table(int *frame_table) {
@@ -34,9 +36,10 @@ void *initialise_page_table(void) {
 }
 
 
+/******************************************************************** ALLOCATE, EVICT, FREE, UPDATE FUNCTIONS ****************************************************************************************************/
 
 
-// Allocate pages for a process
+// Allocate pages for a process task 3
 int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int* total_frames_allocated, int simul_time) {
     // first check if there are enough empty frames
         // if there are enough, allocate the frames to the process  
@@ -128,7 +131,7 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
     return 1; // All pages allocated successfully. 
 }
 
-
+// Evict pages in process that was least recently used task 3
 int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time) {
     node_t *current = lru_list->foot; // Start from the tail (LRU)
 
@@ -364,6 +367,8 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
 
 
 
+/******************************************************************** HELPER FUNCTIONS ***************************************************************************************************************************/
+
 // Allocate process_id in page_table_entry_t 
 void allocate_process_id_page_table(page_table_entry_t *entry, process_t *process) {
     char *id = process->process_id;
@@ -387,8 +392,6 @@ void allocate_process_id_page_table(page_table_entry_t *entry, process_t *proces
     // Copy the new process_id into the allocated memory
     strcpy(entry->process_id, id);
 }
-
-
 
 // Copy process to put into LRU, we do this to avoid memory errors.
 process_t *copy_process(process_t *process) {
@@ -423,7 +426,6 @@ process_t *copy_process(process_t *process) {
     return copy;
 
 }
-
 
 // Print the page table
 void print_page_table(page_table_entry_t *page_table) {

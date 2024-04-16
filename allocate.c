@@ -91,8 +91,6 @@ int main(int argc, char **argv) {
 
     fclose(file);
 
-    printf("\n");
-
 
     //Execute process manager depending on which task 
     if (strcmp(memory_strat, INFINITE) == 0) {

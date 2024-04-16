@@ -1,0 +1,31 @@
+- can largely reuse paged() function 
+
+in task 4, processes doe not need all pages to be allocated before it is allowed to execute
+
+- A process can be exeuted if at least 4 pages are allocated. 
+    or all pages incase of processes requiring less than 4 pages. 
+
+    If there are more than 4 frames available at the time of allocation (or reallocation), the process manager
+    must allocate as many pages as possible. 
+
+        if there are not enought frames, pages of the least recently executed process needs 
+        to be evicted one at a time unti there are 4 empty pages OR LESS if process requires less than 4 pages
+
+        evict from lowest number first
+        e.g. 1,5,7,9
+            evict 1,5 if two frames needed. 
+
+
+processManager file
+
+    round robin scheduler determines process p, the next process to be allocated to the CPU 
+
+
+        memoryManagement file 
+
+            allocate memory function 
+                check how many free frames there are,
+                    if num_free_frames < 4 
+                        evict_lru_pages - pass in how many frames are needed until there are 4 empty pages
+                            keep evicting pages in processes until just the number of frames are needed
+                            

@@ -14,7 +14,7 @@ void first_fit();
 void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum);
 
 // Task 4: Round-Robin with Virtual Memory Allocation
-void virtual(); 
+void virtual(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum);
 
 
 

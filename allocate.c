@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
         paged(process_list, arrived_list, complete_list, quantum);
     }
     else if (strcmp(memory_strat, VIRTUAL) == 0) {
-        virtual();
+        virtual(process_list, arrived_list, complete_list, quantum);
     }
 
 

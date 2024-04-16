@@ -8,7 +8,7 @@ in task 4, processes doe not need all pages to be allocated before it is allowed
     If there are more than 4 frames available at the time of allocation (or reallocation), the process manager
     must allocate as many pages as possible. 
 
-        if there are not enought frames, pages of the least recently executed process needs 
+        if there are not enough frames, pages of the least recently executed process needs 
         to be evicted one at a time unti there are 4 empty pages OR LESS if process requires less than 4 pages
 
         evict from lowest number first
@@ -28,4 +28,3 @@ processManager file
                     if num_free_frames < 4 
                         evict_lru_pages - pass in how many frames are needed until there are 4 empty pages
                             keep evicting pages in processes until just the number of frames are needed
-                            

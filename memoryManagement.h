@@ -28,6 +28,9 @@ int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *
 
 void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time, int* frames_allocated);
 
+// Allocate pages for virtual - Task 4
+int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int* total_frames_allocated, int simul_time);
+
 
 // Update the lru
 void update_lru(process_t *process, list_t *lru_list);

@@ -32,3 +32,5 @@ process scheduling loop - iterating through processes.
 
 
         CURRENT PROBLEM: evicted frames need reset???? also need running time and mem-usage
+
+        BUFFER OVERFLOW

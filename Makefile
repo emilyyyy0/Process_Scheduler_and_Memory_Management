@@ -3,7 +3,7 @@ allocate: allocate.c allocate.h list.c list.h processManager.c processManager.h 
 
 
 run:
-	./allocate -f cases/task3/simple-evict.txt -q 1 -m paged
+	./allocate -f cases/task3/internal-frag.txt -q 1 -m paged
 	
 clean: 
 	rm -f allocate allocate.o list.o processManager.o

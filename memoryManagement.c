@@ -425,7 +425,7 @@ process_t *copy_process(process_t *process) {
 }
 
 
-
+// Print the page table
 void print_page_table(page_table_entry_t *page_table) {
     printf("Page Table:\n");
     printf("----------\n");
@@ -452,7 +452,7 @@ void print_page_table(page_table_entry_t *page_table) {
     printf("\n");
 }
 
-
+// Check if the process has already been allocated memory in task 3
 int check_process_allocated(process_t* process, page_table_entry_t *page_table) {
     for (int i = 0; i < NUM_PAGES; i++) {
         if (page_table[i].process_id != NULL && 
@@ -463,7 +463,7 @@ int check_process_allocated(process_t* process, page_table_entry_t *page_table) 
     return 0; // Process has no pages allocated 
 }
 
-
+// Print the frame table
 void print_frame_table(int *frame_table) {
     printf("Frame Table:\n");
     printf("------------\n");
@@ -477,6 +477,7 @@ void print_frame_table(int *frame_table) {
     printf("\n"); 
 }
 
+// Print lru_list
 void print_lru_list(list_t *lru_list) {
     printf("LRU List (Head to Tail):\n");
     printf("-----------------------\n");
@@ -489,7 +490,7 @@ void print_lru_list(list_t *lru_list) {
 
 }
 
-
+// Function to free the page_table
 void free_page_table(page_table_entry_t *page_table) {
     if (page_table == NULL) {
         return; // If the pointer is NULL, there's nothing to free

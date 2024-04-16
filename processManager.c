@@ -278,7 +278,7 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
             process_t* current_run = remove_head(arrived_list);
             
             // Allocate memory for the process 
-            if (allocate_pages(current_run, page_table, frame_table, lru_list, &frames_allocated)) {
+            if (allocate_pages(current_run, page_table, frame_table, lru_list, &frames_allocated, simul_time)) {
                 current_run->state = RUNNING; // State is changed to running 
                 if (strcmp(prev_process, current_run->process_id) != 0) {
                     start_process_paged(process_list, arrived_list, current_run, &simul_time, page_table, frames_allocated); // prints to stdout

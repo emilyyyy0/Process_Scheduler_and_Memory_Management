@@ -37,7 +37,7 @@ void *initialise_page_table(void) {
 
 
 // Allocate pages for a process
-int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int* total_frames_allocated) {
+int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int* total_frames_allocated, int simul_time) {
     // first check if there are enough empty frames
         // if there are enough, allocate the frames to the process  
         // NOT enough, call LRU function and evict ALL pages from the tail of the lru list, 
@@ -79,7 +79,7 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
 
         // if there are not enough free frames, evict pages using LRU 
         if (num_free_frames < num_pages_needed) {
-            num_evicted = evict_lru_pages(num_pages_needed - num_free_frames, page_table, frame_table, lru_list);
+            num_evicted = evict_lru_pages(num_pages_needed - num_free_frames, page_table, frame_table, lru_list, simul_time);
             // if frames are evicted, change the total number of frames allocated
             *total_frames_allocated = *total_frames_allocated - num_evicted;
         } else {
@@ -122,7 +122,7 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
 }
 
 
-int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list) {
+int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time) {
     node_t *current = lru_list->foot; // Start from the tail (LRU)
 
     //printf("in the evict_lru_page function\n");
@@ -141,7 +141,7 @@ int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *
                 num_evicted++;
 
                 // print EVICTED event
-                printf("%d,EVICTED,evicted-frames=[%d]\n", lru_process->time_finished, frame_to_free); // CHANGE THIS PRINT STATEMENT
+                printf("%d,EVICTED,evicted-frames=[%d]\n",simul_time, frame_to_free); // CHANGE THIS PRINT STATEMENT
 
                 // Update page table
                 page_table[i].process_id = NULL; 
@@ -235,12 +235,30 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
     // Iterate through page table and free frames. 
     //printf("free page function\n");
 
-    char frame_numbers[256] = {0};  // Buffer to store frame numbers
+    // Dynamic memory to avoid buffer overflow
+    int capacity = 256; 
+    char *frame_numbers = malloc(capacity * sizeof(char));
+    frame_numbers[0] = '\0'; // Start with an empty string
+
+    //char frame_numbers[256] = {0};  // Buffer to store frame numbers
     
     int first = 1;  // Flag to help format with commas
 
 
     for (int i = 0; i < NUM_PAGES; i++) {
+
+        // Check if there is enough space in frame_numbers, if not realloc
+        if (strlen(frame_numbers) + 10 >= capacity) {
+            capacity *= 2; // Double the capacity 
+            char *new_frame_numbers = realloc(frame_numbers, capacity * sizeof(char));
+                if (!new_frame_numbers) {
+                    perror("Failed to reallocate frame_numbers");
+                    free(frame_numbers);
+                    return;
+                }
+            frame_numbers = new_frame_numbers;
+        }
+
     
         if ((page_table[i].process_id != NULL) && strcmp(page_table[i].process_id, process->process_id) == 0) {
             if (!first) {
@@ -297,6 +315,7 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
         current = current->next;
     }
 
+    free(frame_numbers);
 
 }
 

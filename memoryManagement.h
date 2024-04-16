@@ -22,9 +22,9 @@ void initialise_frame_table(int *frame_table);
 // Function to initialise page table
 void *initialise_page_table(void);
 
-int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lry_list, int* total_frames_allocated);
+int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lry_list, int* total_frames_allocated, int simul_time);
 
-int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list);
+int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time);
 
 void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time, int* frames_allocated);
 

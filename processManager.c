@@ -345,10 +345,19 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
 
 // Start process for task 3
 void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *current_process, int* current_time, page_table_entry_t *page_table, int total_num_frames_current) {
+    //printf("in starting process paged function\n");
     int state = current_process->state;
     char *state_str = malloc(20 * sizeof(char));
 
-    char frame_numbers[256] = {0};  // Buffer to store frame numbers
+
+
+    // Need to dynamically reallocate to avoid buffer overflow 
+    int capacity = 256; 
+    char *frame_numbers = malloc(capacity * sizeof(char));
+    frame_numbers[0] = '\0'; // Start with an empty string
+    //char frame_numbers[256] = {0};  // Buffer to store frame numbers
+    
+    
     int first = 1;  // Flag to help format with commas
 
 
@@ -363,8 +372,20 @@ void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *
 
     int memUsage = divide_and_round_up( total_num_frames_current * 100 ,NUM_PAGES);
     
-    //printf("%d,%s,process-name=%s,remaining-time=%d, mem-usage=%d%%,mem-frames=[", *current_time, state_str, current_process->process_id, current_process->time_remain, memUsage);
     for (int i = 0; i < NUM_PAGES; i++) {
+
+        // Check if there is enough space in frame_numbers, if not realloc
+        if (strlen(frame_numbers) + 10 >= capacity) {
+            capacity *= 2; // Double the capacity 
+            char *new_frame_numbers = realloc(frame_numbers, capacity * sizeof(char));
+                if (!new_frame_numbers) {
+                    perror("Failed to reallocate frame_numbers");
+                    free(state_str);
+                    free(frame_numbers);
+                    return;
+                }
+            frame_numbers = new_frame_numbers;
+        }
         
         if ((page_table[i].process_id != NULL) && (strcmp(page_table[i].process_id, current_process->process_id) == 0)) {
             if (!first) {
@@ -376,14 +397,6 @@ void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *
             strcat(frame_numbers, frame_number_str);  // Append current frame number to the list
 
             first = 0; // Update flag after the first frame number is added. 
-
-            
-            // if (i == 0) {
-            //     printf("%d",page_table[i].frame_number); 
-            //     continue;
-            // }
-            // printf(",");
-            // printf("%d",page_table[i].frame_number); 
         }
         
     }
@@ -392,5 +405,7 @@ void start_process_paged(list_t *process_list, list_t *arrived_list, process_t *
         printf("%d,%s,process-name=%s,remaining-time=%d,mem-usage=%d%%,mem-frames=[%s]\n", *current_time, state_str, current_process->process_id, current_process->time_remain, memUsage, frame_numbers);
 
     }
+    free(state_str);
+    free(frame_numbers);
     
 }

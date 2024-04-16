@@ -125,7 +125,7 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
 int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list) {
     node_t *current = lru_list->foot; // Start from the tail (LRU)
 
-    printf("in the evict_lru_page function ");
+    //printf("in the evict_lru_page function\n");
     int num_evicted = 0;
 
     while (current != NULL && num_frames_needed > 0) {
@@ -236,6 +236,7 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
     //printf("free page function\n");
 
     char frame_numbers[256] = {0};  // Buffer to store frame numbers
+    
     int first = 1;  // Flag to help format with commas
 
 

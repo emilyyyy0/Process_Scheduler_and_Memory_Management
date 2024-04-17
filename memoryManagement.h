@@ -31,6 +31,9 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
 // Allocate pages for virtual - Task 4
 int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int* total_frames_allocated, int simul_time);
 
+// Evict least recently used pages in process - Task 4
+int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time);
+
 
 // Update the lru
 void update_lru(process_t *process, list_t *lru_list);
@@ -44,7 +47,8 @@ process_t *copy_process(process_t *process);
 // Function to check if process has already been allocated paged memory
 int check_process_allocated(process_t* process, page_table_entry_t *page_table);
 
-
+// Function to count number of pages allocated in a process
+int count_num_allocated(process_t* process, page_table_entry_t *page_table);
 
 // Print page table
 void print_page_table(page_table_entry_t *page_table);

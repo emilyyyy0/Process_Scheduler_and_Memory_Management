@@ -383,6 +383,7 @@ void virtual(list_t *process_list, list_t *arrived_list, list_t *complete_list, 
             if (allocate_pages_virtual(current_run, page_table, frame_table, lru_list, &frames_allocated, simul_time)) {
                 current_run->state = RUNNING; // State is changed to running 
                 if (strcmp(prev_process, current_run->process_id) != 0) {
+                    printf("process manager\n");
                     start_process_paged(process_list, arrived_list, current_run, &simul_time, page_table, frames_allocated); // prints to stdout
                     //print_page_table(page_table);
                     prev_process = current_run->process_id;

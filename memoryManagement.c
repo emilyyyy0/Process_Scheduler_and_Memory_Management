@@ -402,7 +402,7 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
     // Update the lru_list as process has been used. 
     if ((num_pages_already_allocated >= 4) && (num_pages_needed >= 4)) {
         printf("EXITING THE ALLOCATE MEMORY, already enough memory\n");
-        print_page_table(page_table);
+        //print_page_table(page_table);
         update_lru(process, lru_list);
         return 1;
     }
@@ -491,9 +491,26 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
             // if frames are evicted, change the total number of frames allocated
             *total_frames_allocated = *total_frames_allocated - num_evicted;
         } else {
-            // Allocate frames in increasing order
+            
             for (int frame_number = 0; frame_number < NUM_PAGES ; frame_number++) { 
-                // if num_evicted > 0 then we have to start allocating from beginning 
+                // if num_evicted > 0 then we have to start allocating from the first frame free beginning 
+
+                if (num_evicted > 0) {
+                    if (frame_table[frame_number] == 0) {
+                        // we have a free frame, frame_number = the frame that is free so we allocate to frame that is free
+                        // allocate frame and update page table
+                        allocate_process_id_page_table(&page_table[frame_number], process); // allocate process_id at place where we are allocating frame
+                        page_table[frame_number].frame_number = frame_number;  // frame number where free is where we put frame number, we want to keep page table array in order of frames
+                        num_frames_allocated++;
+
+                        frame_table[frame_number] = 1; // Mark frame as occupied 
+                        if (num_frames_allocated == num_pages_needed) {
+                        break; // All pages allocated
+                    }
+
+                    }
+
+                }
             
 
                 // else allocate as normal
@@ -522,7 +539,7 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
 
     *total_frames_allocated = *total_frames_allocated + num_frames_allocated;
     printf("\ntotal num frames currently allocated: %d\n", *total_frames_allocated );
-    print_page_table(page_table);
+    //print_page_table(page_table);
         
     return 1; // All pages allocated successfully. 
 }
@@ -611,7 +628,7 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
 
 
     }
-    print_page_table(page_table); 
+    //print_page_table(page_table); 
     free(frame_numbers);
     printf("num_evicted: %d\n EXIT EVICT_LRU_FUNCTION\n", num_evicted);
     return num_evicted;

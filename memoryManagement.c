@@ -401,8 +401,8 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
     // If the number of pages allocated in a process is >= 4, and the number of pages needed is >= 4 then we continue running, as do not need to allocate more memory.
     // Update the lru_list as process has been used. 
     if ((num_pages_already_allocated >= 4) && (num_pages_needed >= 4)) {
-        printf("EXITING THE ALLOCATE MEMORY, already enough memory\n");
-        //print_page_table(page_table);
+        printf("************************** EXITING THE ALLOCATE MEMORY, already enough memory ***************************\n");
+        print_page_table(page_table);
         update_lru(process, lru_list);
         return 1;
     }
@@ -465,7 +465,7 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
     
 
     printf("\nAFTER\nnum pages needed: %d\n", num_pages_needed);
-    printf("num pages needed at the end of the allocation: %d\n", num_pages_needed);
+    printf("num pages needed at the end of the allocation: %d\n\n\n", num_pages_needed);
 
     int num_frames_allocated = 0; // number of frames allocated in the frame table for this new process
 
@@ -500,6 +500,7 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
                         // we have a free frame, frame_number = the frame that is free so we allocate to frame that is free
                         // allocate frame and update page table
                         allocate_process_id_page_table(&page_table[frame_number], process); // allocate process_id at place where we are allocating frame
+                        page_table[frame_number].page_number = frame_number; // want the page num to be same as frame num
                         page_table[frame_number].frame_number = frame_number;  // frame number where free is where we put frame number, we want to keep page table array in order of frames
                         num_frames_allocated++;
 
@@ -517,10 +518,10 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
                 if (frame_table[frame_number] == 0) {
                     // Allocate frame and update page table
 
-                    allocate_process_id_page_table(&page_table[*total_frames_allocated + num_frames_allocated], process);
+                    allocate_process_id_page_table(&page_table[frame_number], process);
 
-                    page_table[*total_frames_allocated + num_frames_allocated].page_number = num_frames_allocated; // allocate page number 
-                    page_table[*total_frames_allocated + num_frames_allocated].frame_number = frame_number; // allocate frame number 
+                    page_table[frame_number].page_number = frame_number; // allocate page number 
+                    page_table[frame_number].frame_number = frame_number; // allocate frame number 
                     num_frames_allocated++;
                     
                     frame_table[frame_number] = 1; // Mark frame as occupied
@@ -533,13 +534,14 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
         }
 
     }
-    //print_page_table(page_table);
 
     update_lru(process, lru_list);
 
     *total_frames_allocated = *total_frames_allocated + num_frames_allocated;
     printf("\ntotal num frames currently allocated: %d\n", *total_frames_allocated );
-    //print_page_table(page_table);
+    print_page_table(page_table);
+    print_lru_list(lru_list);
+    printf("*************************** END OF THE ALLOCATION FUNCTION **********************************\n\n");
         
     return 1; // All pages allocated successfully. 
 }
@@ -557,12 +559,14 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
 
     int first = 1; // Flag to help format with commas
 
-    printf("in the evict_lru_page function\n");
+    printf("IN THE EVICT_LRU_PAGES_VIRTUAL FUNCTION \n");
     int num_evicted = 0;
 
     while (current != NULL && num_frames_needed > 0) {
         
         process_t *lru_process = current->data; 
+
+        printf("Process being evicted: %s\n ", lru_process->process_id);
 
         // Evict pages of the LRU process until enough 
         for (int i = 0; i < NUM_PAGES; i++) {
@@ -615,20 +619,27 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
 
 
         // Change LRU_List
-        node_t *temp = current; 
-        lru_list->foot = current->prev; 
+        // only if all pages are deallocated we remove from the list 
+        int num_pages_left = count_num_allocated(lru_process, page_table);
 
-        if (lru_list->foot != NULL) {
-            lru_list->foot->next = NULL;
-        } else {
-            lru_list->head = NULL; // List is now empty 
+        if (num_pages_left <= 0) {
+            node_t *temp = current; 
+            lru_list->foot = current->prev; 
+
+            if (lru_list->foot != NULL) {
+                lru_list->foot->next = NULL;
+            } else {
+                lru_list->head = NULL; // List is now empty 
+            }
+            free_node(temp);
+            current = lru_list->foot; // Move to the new tail (LRU)
+
         }
-        free_node(temp);
-        current = lru_list->foot; // Move to the new tail (LRU)
 
 
     }
-    //print_page_table(page_table); 
+    print_page_table(page_table); 
+    print_lru_list(lru_list);
     free(frame_numbers);
     printf("num_evicted: %d\n EXIT EVICT_LRU_FUNCTION\n", num_evicted);
     return num_evicted;

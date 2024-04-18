@@ -95,20 +95,20 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
         } else {
             // Allocate frames in increasing order
             for (int frame_number = 0; frame_number < NUM_PAGES ; frame_number++) { 
+                
                 if (frame_table[frame_number] == 0) {
                     // Allocate frame and update page table
 
-                    allocate_process_id_page_table(&page_table[*total_frames_allocated + num_frames_allocated], process);
+                    allocate_process_id_page_table(&page_table[frame_number], process);
 
-                    page_table[*total_frames_allocated + num_frames_allocated].page_number = num_frames_allocated; // change this 
-                    page_table[*total_frames_allocated + num_frames_allocated].frame_number = frame_number;
+                    page_table[frame_number].page_number = frame_number; // allocate page number 
+                    page_table[frame_number].frame_number = frame_number; // allocate frame number 
                     num_frames_allocated++;
                     
                     frame_table[frame_number] = 1; // Mark frame as occupied
                     if (num_frames_allocated == num_pages_needed) {
                         break; // All pages allocated
                     }
-
                 }
             }
         }
@@ -390,7 +390,7 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
     int remainder = process->memory % PAGE_SIZE; // need to allocate an extra page if not enough
     num_pages_needed += remainder; // Number of pages needed for the process
 
-    int total_pages_process = num_pages_needed; // this the the max number of pages a process can have 
+    //int total_pages_process = num_pages_needed; // this the the max number of pages a process can have 
 
     int num_FREE_frames = NUM_PAGES - *total_frames_allocated;
 
@@ -504,8 +504,8 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
 
                         frame_table[frame_number] = 1; // Mark frame as occupied 
                         if (num_frames_allocated == num_pages_needed) {
-                        break; // All pages allocated
-                    }
+                            break; // All pages allocated
+                        }
 
                     }
 

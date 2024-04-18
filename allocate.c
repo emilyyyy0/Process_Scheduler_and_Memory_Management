@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     if (strcmp(memory_strat, INFINITE) == 0) {
         infinite(process_list, arrived_list, complete_list, quantum);
     } else if (strcmp(memory_strat, FIRST_FIT) == 0) {
-        first_fit();
+        first_fit(process_list, arrived_list, complete_list, quantum);
     } else if (strcmp(memory_strat, PAGED ) == 0) {
         paged(process_list, arrived_list, complete_list, quantum);
     }

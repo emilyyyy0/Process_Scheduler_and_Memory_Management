@@ -35,6 +35,23 @@ void *initialise_page_table(void) {
     return page_table;  // Return the pointer to the allocated and initialized page table
 }
 
+// Intialise Memory Block 
+void initialise_memory_block(memory_block_t **head) {
+    *head = malloc(sizeof(memory_block_t));
+    if (*head == NULL) {
+        perror("Memory allocation failed for initial memory block");
+        exit(1); // Handles allocation failutre
+    }
+
+    (*head)->start_address = 0; 
+    (*head)->size = TOTAL_MEMORY;
+    (*head)->status = FREE;
+    (*head)->process_id = NULL;
+    (*head)->next = NULL;
+
+}
+
+
 
 /******************************************************************** ALLOCATE, EVICT, FREE, UPDATE FUNCTIONS ****************************************************************************************************/
 
@@ -545,7 +562,6 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
 }
 
 
-
 // Evict pages in process that was least recently used - Task 4
 int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time) {
     node_t *current = lru_list->foot; // Start from the tail (LRU)
@@ -644,6 +660,24 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
 
 }
 
+
+// Allocate blocks - Task 2
+int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
+
+    // Implement first firt memory allocation 
+    memory_block_t *current = memory_head; 
+
+    // iterate through the memory_block_t list and find the first free block that is large enough to accomodate the requested size. 
+        // if the block is larger than the memory required, we split the block, one allocated and the free block 
+        // return 1 if allocation is successfull, 0 otherwise. 
+        
+    while (current != NULL) {
+
+    }
+
+
+
+}
 
 /******************************************************************** HELPER FUNCTIONS ***************************************************************************************************************************/
 
@@ -799,4 +833,19 @@ void free_page_table(page_table_entry_t *page_table) {
     //printf("freeing the page table\n");
     free(page_table);
 
+}
+
+// Free blocked memory once we are done using it
+void free_memory_blocks(memory_block_t *head) {
+    memory_block_t *current = head; 
+    while (current != NULL) {
+        // Free process_id if it was allocated
+        if (current->process_id != NULL) {
+            free(current->process_id);
+        } 
+
+        memory_block_t *temp = current; 
+        current = current->next; 
+        free(temp); // Free the memory_block_t structure
+    }
 }

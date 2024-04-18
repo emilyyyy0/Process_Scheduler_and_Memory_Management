@@ -8,7 +8,7 @@
 void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum);
 
 // Task 2: Round-Robin Scheduling with Contiguous Memory Allocation
-void first_fit();
+void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum);
 
 // Task 3: Round-Robin Scheduling with Paged Memory Allocation
 void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum);

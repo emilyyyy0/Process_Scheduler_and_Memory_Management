@@ -28,3 +28,16 @@ processManager file
                     if num_free_frames < 4 
                         evict_lru_pages - pass in how many frames are needed until there are 4 empty pages
                             keep evicting pages in processes until just the number of frames are needed
+
+
+
+PROBLEM: 
+
+5,RUNNING,process-name=P4,remaining-time=4,mem-usage=100%,mem-frames=[8,9,10,11]
+this should be output 
+
+5,RUNNING,process-name=P4,remaining-time=4,mem-usage=100%,mem-frames=[0,1,2,3]
+current output
+
+wrong process being evicted
+not updating lru somewhere 

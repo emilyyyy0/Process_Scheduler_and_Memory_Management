@@ -663,6 +663,7 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
 
 // Allocate blocks - Task 2
 int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
+    // size = the size of memory the process needs to be allocated to run 
 
     // Implement first firt memory allocation 
     memory_block_t *current = memory_head; 
@@ -672,12 +673,70 @@ int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
         // return 1 if allocation is successfull, 0 otherwise. 
         
     while (current != NULL) {
+        if (current->status == FREE && current->size >= size) {
+            // Allocate the block 
+            current->status = ALLOCATED;
+            current->process_id = process->process_id; 
+
+            // Split block if necessary 
+            int remaining_size = current->size - size; 
+            if (remaining_size > 0) {
+                memory_block_t *new_block = (memory_block_t *)malloc(sizeof(memory_block_t));
+                new_block->start_address = current->start_address + size; 
+                new_block->size = remaining_size; 
+                new_block->status = FREE;
+                new_block->process_id = NULL; 
+                new_block->next = current->next;
+                current->next = new_block;
+                current->size = size; 
+            }
+
+            return 1; // Allocation successful
+        }
+
+        current = current->next;
 
     }
 
-
+    return 0; // Allocation failed (no suitable block found)
 
 }
+
+
+// Free blocks at end of process and merge 
+void free_block(process_t *process, memory_block_t *memory_head) {
+    memory_block_t *current = memory_head; 
+    memory_block_t *previous = NULL;
+
+    while (current != NULL) {
+        if (current->status == ALLOCATED && strcmp(current->process_id, process->process_id) == 0) {
+            // Free the block 
+            current->status = FREE;
+            free(current->process_id); 
+            current->process_id = NULL;
+
+            // Merge with previous block if its free
+            if (previous != NULL && previous->status == FREE) {
+                previous->size += current->size; 
+                previous->next = current->nextl
+                free(current); 
+                current = previous;
+            }
+
+            // Merge with next block if it's free
+            if (current->next != NULL && current->next->status == FREE) {
+                current->size += current->next->size; 
+                memory_block_t *temp = current->next;
+                current->next = current->next->next; 
+                free(temp);
+            }
+            break;
+        }
+        previous = current;
+        current = current->next;
+    }
+}
+
 
 /******************************************************************** HELPER FUNCTIONS ***************************************************************************************************************************/
 

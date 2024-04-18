@@ -464,6 +464,7 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
             process_t* current_run = remove_head(arrived_list);
             
             // Allocate memory for the process 
+            // if cant allocate move to back of queue, remain in READY state
             if (allocate_blocks(current_run, current_run->memory, memory_head)) {
                 current_run->state = RUNNING; // State is changed to running 
                 if (strcmp(prev_process, current_run->process_id) != 0) {
@@ -473,6 +474,9 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
                 }
                 //printf("frames allocated: %d\n", frames_allocated);
                 
+            } else {
+                // if not allocated, put the process to back of the queue, 
+                insert_at_foot(arrived_list, current_run);
             }
 
             
@@ -495,7 +499,7 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
                 
                     //process_finish(complete_list, current_run, simul_time, &num_process_left);
                     // CHANGE THIS, when a process finishes, we free the block. And merge free blocks to avoid fragmentation
-                    free_pages(current_run, page_table, frame_table, lru_list, simul_time, &frames_allocated);
+                    free_blocks(current_run, memory_head);
                     //print_process(tmp);
                     process_finish(complete_list, current_run, simul_time, &num_process_left);
                     process_timer = quantum;
@@ -521,4 +525,21 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
     free_memory_blocks(memory_head);
     print_stats(complete_list, simul_time);
 
+}
+
+// Task 2 start
+void start_process_block(list_t *process_list, list_t *arrived_list, process_t *current_process, int *current_time, memory_block_t *memory_head) {
+    int state = current_process->state;
+    char *state_str = malloc(20 * sizeof(char));
+
+    if (state == 0) {
+        strcpy(state_str,"DEFAULT");
+    } else if (state == 1) {
+        strcpy(state_str,"READY");
+    } else if (state == 2) {
+        strcpy(state_str, "RUNNING");
+    }
+
+    
+    printf("%d,%s,process-name=%s,remaining-time=%d\n", *current_time, state_str, current_process->process_id, current_process->time_remain);
 }

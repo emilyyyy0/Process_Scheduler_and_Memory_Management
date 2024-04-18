@@ -28,7 +28,7 @@ typedef struct memory_block {
     struct memory_block *next; // this poitns to the next memory block in the linked list 
 } memory_block_t;
 
-/******************** Functions to initialise data structures for paged memory. Page table and frame table *****************************/
+/************************** Functions to initialise data structures for paged memory. Page table and frame table *****************************/
 
 // Function to initialise frame table
 void initialise_frame_table(int *frame_table);
@@ -73,6 +73,9 @@ int count_num_allocated(process_t* process, page_table_entry_t *page_table);
 
 // Allocate block for Contiguous memory - Task 2
 int allocate_block(process_t *process, int size, memory_block_t *memory_head);
+
+// Free blocks and merge if there are holes next to it - Task 2
+void free_block(process_t *process, memory_block_t *memory_head);
 
 /************************************************* Printing Functions *********************************************************/
 

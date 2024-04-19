@@ -434,7 +434,6 @@ void virtual(list_t *process_list, list_t *arrived_list, list_t *complete_list, 
 
 // Task 2: Round Robin Scheduling with Contiguous Memory Allocation 
 void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list, int quantum) {
-    printf("first fit memory strat\n");
 
     int simul_time = 0;
     int process_timer = quantum; // timer set to quantum as limit 
@@ -443,7 +442,7 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
 
     // Initialise head of blocked memory
     memory_block_t *memory_head = NULL; 
-    intialise_memory_block(&memory_head);
+    initialise_memory_block(&memory_head);
 
     
 
@@ -453,7 +452,7 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
         // print_list(process_list);
         
         // check if there is any processes that have arrived
-        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
+        if (!check_arriving_process_2(process_list, arrived_list, simul_time, &num_process_left, quantum)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
             simul_time++; // if no process has arrived, increase simulation time and wait. 
         }
 
@@ -462,25 +461,33 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
         while (arrived_list->head != NULL &&  process_timer >= 0) {
             // if two processes have the same arrival time, the one that was not just executed goes first
             process_t* current_run = remove_head(arrived_list);
+            printf("\n\nprocess_timer in the second while loop: %d\n", process_timer);
             
             // Allocate memory for the process 
             // if cant allocate move to back of queue, remain in READY state
-            if (allocate_blocks(current_run, current_run->memory, memory_head)) {
+            if (allocate_block(current_run, current_run->memory, memory_head)) {
+                printf("simul time: %d\n", simul_time);
                 current_run->state = RUNNING; // State is changed to running 
                 if (strcmp(prev_process, current_run->process_id) != 0) {
-                    start_process_paged(process_list, arrived_list, current_run, &simul_time, page_table, frames_allocated); // prints to stdout
-                    //print_page_table(page_table);
+                    start_process_block(process_list, arrived_list, current_run, &simul_time, memory_head); // prints to stdout
                     prev_process = current_run->process_id;
                 }
+
+                
                 //printf("frames allocated: %d\n", frames_allocated);
                 
             } else {
                 // if not allocated, put the process to back of the queue, 
-                insert_at_foot(arrived_list, current_run);
+                if (strcmp(prev_process, current_run->process_id) != 0) {
+                    insert_at_foot(arrived_list, current_run);
+
+                }
             }
 
             
             while (1) {
+                printf("in while loop 1 simul time: %d\n", simul_time);
+
                 // add arrived processes to the queue, awaiting to be executed
                 check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
 
@@ -496,10 +503,11 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
 
                 if ((current_run->time_remain == 0) && (process_timer == 0)) {
                     current_run->state = 3; // change state to FINISHED
-                
+
+                    printf("finishe the process\n");
                     //process_finish(complete_list, current_run, simul_time, &num_process_left);
                     // CHANGE THIS, when a process finishes, we free the block. And merge free blocks to avoid fragmentation
-                    free_blocks(current_run, memory_head);
+                    free_block(current_run, memory_head);
                     //print_process(tmp);
                     process_finish(complete_list, current_run, simul_time, &num_process_left);
                     process_timer = quantum;
@@ -510,7 +518,9 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
                 
                 // if the quantum time is reached, reset the timer and move onto the next process
                 if (process_timer == 0) {
+                    printf("END OF QUANTUM\n");
                     check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
+                    print_list(arrived_list);
 
                     insert_at_foot(arrived_list, current_run);
 
@@ -529,6 +539,32 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
 
 // Task 2 start
 void start_process_block(list_t *process_list, list_t *arrived_list, process_t *current_process, int *current_time, memory_block_t *memory_head) {
+    // Find the allocated block for the process
+    
+    memory_block_t *current_block = memory_head; 
+    while (current_block != NULL) {
+        if (current_block->status == ALLOCATED && strcmp(current_block->process_id, current_process->process_id) == 0) {
+            break; // FOUND the block
+        }
+        current_block = current_block->next;
+    }
+
+    // Calculate memory usage percentage
+    int total_memory_used = 0;
+    memory_block_t *block = memory_head; 
+    while (block != NULL) {
+        if (block != NULL) {
+            if (block ->status == ALLOCATED) {
+                total_memory_used += block->size; 
+            }
+        }
+        block = block->next; 
+    }
+
+
+    // calcualte memory usage percentage 
+    int mem_usage = divide_and_round_up(total_memory_used * 100, TOTAL_MEMORY);
+
     int state = current_process->state;
     char *state_str = malloc(20 * sizeof(char));
 
@@ -540,6 +576,56 @@ void start_process_block(list_t *process_list, list_t *arrived_list, process_t *
         strcpy(state_str, "RUNNING");
     }
 
-    
-    printf("%d,%s,process-name=%s,remaining-time=%d\n", *current_time, state_str, current_process->process_id, current_process->time_remain);
+    if (current_block != NULL) {
+        printf("%d,%s,process-name=%s,remaining-time=%d,mem-usage=%d%%,allocated-at=%d\n", 
+                *current_time, state_str, current_process->process_id, current_process->time_remain, mem_usage, current_block->start_address);
+    } else {
+        // Handle the case where the block is not found (shouldn't happen if allocation was successful)
+        printf("Error: Block not found for process %s\n", current_process->process_id);
+    }
+
+}
+
+
+
+// Function to check if there are any processes that have arrived at a particular simulation time
+int check_arriving_process_2(list_t *process_list, list_t *arrived_list, int simul_time, int* num_process_left, int quantum) {
+    //print_list(process_list);
+
+    // Boolean integer value, if 0, means no incoming arrival process
+    // if 1, means there are incoming process that are arriving. 
+    int bool_incoming = 0; 
+
+
+    // iterate through process_list, if simul_time >= current process, pop the process from process_list and push onto arrived_list.
+    node_t *current = process_list->head; // Start from the head of the list
+    node_t *next = NULL;
+
+    while (current != NULL) { 
+        next = current->next; // Save the next node before potentially modifying the list
+
+        if ((simul_time >= current->data->arrival_time) && (simul_time % quantum == 0)){
+            // add to arrived_list;
+            insert_at_foot(arrived_list, current->data);
+            //printf("the process that has arrived= %s at time %d \n", current->data->process_id, simul_time);
+
+            // then pop the process off of the all process list 
+            remove_head(process_list);
+
+            // could sort for safe measure
+            *num_process_left = *num_process_left + 1;
+
+            bool_incoming = 1;
+            // printf("checking arrived processes: ");
+            // print_process(current->data);
+
+        }
+        
+        //current = current->next; 
+        current = next; // Move to the next node, which we saved before any potential modification
+        
+        
+    }
+    return bool_incoming;
+
 }

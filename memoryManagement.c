@@ -663,7 +663,14 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
 
 // Allocate blocks - Task 2
 int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
+    printf("in allocate_block: process_id %s\n", process->process_id);
+    print_process(process);
     // size = the size of memory the process needs to be allocated to run 
+
+    // Need to check if process has already been allocated
+    if (is_block_process_allocated(process, memory_head)) {
+        return 1;
+    }
 
     // Implement first firt memory allocation 
     memory_block_t *current = memory_head; 
@@ -690,7 +697,8 @@ int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
                 current->next = new_block;
                 current->size = size; 
             }
-
+            print_memory_block_list(memory_head);
+            printf("allocation successful\n");
             return 1; // Allocation successful
         }
 
@@ -698,6 +706,7 @@ int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
 
     }
 
+    print_memory_block_list(memory_head);
     return 0; // Allocation failed (no suitable block found)
 
 }
@@ -718,7 +727,7 @@ void free_block(process_t *process, memory_block_t *memory_head) {
             // Merge with previous block if its free
             if (previous != NULL && previous->status == FREE) {
                 previous->size += current->size; 
-                previous->next = current->nextl
+                previous->next = current->next;
                 free(current); 
                 current = previous;
             }
@@ -875,6 +884,31 @@ void print_lru_list(list_t *lru_list) {
 
 }
 
+// Print memory_block list
+void print_memory_block_list(memory_block_t *memory_head) {
+    printf("Memory Block List:\n");
+    printf("------------------\n");
+
+    memory_block_t *current = memory_head;
+    while (current != NULL) {
+        printf("Address: %d, Size: %d KB, Status: %s", 
+               current->start_address, current->size, 
+               (current->status == FREE) ? "FREE" : "ALLOCATED");
+
+        if (current->status == ALLOCATED) {
+            printf(", Process: %s", current->process_id);
+        }
+        printf("\n");
+
+        current = current->next;
+    }
+
+    printf("\n"); 
+
+
+}
+
+
 // Function to free the page_table
 void free_page_table(page_table_entry_t *page_table) {
     if (page_table == NULL) {
@@ -907,4 +941,16 @@ void free_memory_blocks(memory_block_t *head) {
         current = current->next; 
         free(temp); // Free the memory_block_t structure
     }
+}
+
+// Function to check if a process has been allocated block memory
+int is_block_process_allocated(process_t *process, memory_block_t *memory_head) {
+    memory_block_t *current = memory_head;
+    while (current != NULL) {
+        if (current->status == ALLOCATED && strcmp(current->process_id, process->process_id) == 0) {
+            return 1; // Process is already allocated 
+        }
+        current = current->next;
+    }
+    return 0; // Process is not allocated 
 }

@@ -77,6 +77,10 @@ int allocate_block(process_t *process, int size, memory_block_t *memory_head);
 // Free blocks and merge if there are holes next to it - Task 2
 void free_block(process_t *process, memory_block_t *memory_head);
 
+// Function to check if a process has been allocated block memory
+int is_block_process_allocated(process_t *process, memory_block_t *memory_head);
+
+
 /************************************************* Printing Functions *********************************************************/
 
 // Print page table
@@ -87,6 +91,9 @@ void print_frame_table(int *frame_table);
 
 // Print the lru_list
 void print_lru_list(list_t *lru_list);
+
+// Print memory block list
+void print_memory_block_list(memory_block_t *memory_head);
 
 
 /************************************************* Freeing Functions *********************************************************/

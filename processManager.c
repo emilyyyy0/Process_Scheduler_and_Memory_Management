@@ -25,7 +25,7 @@ void infinite(list_t *process_list, list_t *arrived_list, list_t *complete_list,
         // print_list(process_list);
         
         // check if there is any processes that have arrived
-        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
+        if (!check_arriving_process_2(process_list, arrived_list, simul_time, &num_process_left, quantum)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
             simul_time++; // if no process has arrived, increase simulation time and wait. 
         }
 
@@ -201,7 +201,7 @@ void paged(list_t *process_list, list_t *arrived_list, list_t *complete_list, in
         // print_list(process_list);
         
         // check if there is any processes that have arrived
-        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
+        if (!check_arriving_process_2(process_list, arrived_list, simul_time, &num_process_left, quantum)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
             simul_time++; // if no process has arrived, increase simulation time and wait. 
         }
 
@@ -361,7 +361,7 @@ void virtual(list_t *process_list, list_t *arrived_list, list_t *complete_list, 
         // print_list(process_list);
         
         // check if there is any processes that have arrived
-        if (!check_arriving_process(process_list, arrived_list, simul_time, &num_process_left)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
+        if (!check_arriving_process_2(process_list, arrived_list, simul_time, &num_process_left, quantum)) { // if processes have arrived, they will be popped off the all process_list and pushed onto the arrived_list
             simul_time++; // if no process has arrived, increase simulation time and wait. 
         }
 

@@ -461,12 +461,12 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
         while (arrived_list->head != NULL &&  process_timer >= 0) {
             // if two processes have the same arrival time, the one that was not just executed goes first
             process_t* current_run = remove_head(arrived_list);
-            printf("\n\nprocess_timer in the second while loop: %d\n", process_timer);
+            //printf("\n\nprocess_timer in the second while loop: %d\n", process_timer);
             
             // Allocate memory for the process 
             // if cant allocate move to back of queue, remain in READY state
             if (allocate_block(current_run, current_run->memory, memory_head)) {
-                printf("simul time: %d\n", simul_time);
+                //printf("simul time: %d\n", simul_time);
                 current_run->state = RUNNING; // State is changed to running 
                 if (strcmp(prev_process, current_run->process_id) != 0) {
                     start_process_block(process_list, arrived_list, current_run, &simul_time, memory_head); // prints to stdout
@@ -486,7 +486,7 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
 
             
             while (1) {
-                printf("in while loop 1 simul time: %d\n", simul_time);
+                //printf("in while loop 1 simul time: %d\n", simul_time);
 
                 // add arrived processes to the queue, awaiting to be executed
                 check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
@@ -504,9 +504,8 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
                 if ((current_run->time_remain == 0) && (process_timer == 0)) {
                     current_run->state = 3; // change state to FINISHED
 
-                    printf("finishe the process\n");
-                    //process_finish(complete_list, current_run, simul_time, &num_process_left);
-                    // CHANGE THIS, when a process finishes, we free the block. And merge free blocks to avoid fragmentation
+                    //printf("finishe the process\n");
+                    // when a process finishes, we free the block. And merge free blocks to avoid fragmentation
                     free_block(current_run, memory_head);
                     //print_process(tmp);
                     process_finish(complete_list, current_run, simul_time, &num_process_left);
@@ -518,9 +517,9 @@ void first_fit(list_t *process_list, list_t *arrived_list, list_t *complete_list
                 
                 // if the quantum time is reached, reset the timer and move onto the next process
                 if (process_timer == 0) {
-                    printf("END OF QUANTUM\n");
+                    //printf("END OF QUANTUM\n");
                     check_arriving_process(process_list, arrived_list, simul_time, &num_process_left);
-                    print_list(arrived_list);
+                    //print_list(arrived_list);
 
                     insert_at_foot(arrived_list, current_run);
 

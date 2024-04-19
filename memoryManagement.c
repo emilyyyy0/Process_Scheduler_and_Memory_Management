@@ -663,8 +663,8 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
 
 // Allocate blocks - Task 2
 int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
-    printf("in allocate_block: process_id %s\n", process->process_id);
-    print_process(process);
+    //printf("in allocate_block: process_id %s\n", process->process_id);
+    //print_process(process);
     // size = the size of memory the process needs to be allocated to run 
 
     // Need to check if process has already been allocated
@@ -697,8 +697,8 @@ int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
                 current->next = new_block;
                 current->size = size; 
             }
-            print_memory_block_list(memory_head);
-            printf("allocation successful\n");
+            //print_memory_block_list(memory_head);
+            //printf("allocation successful\n");
             return 1; // Allocation successful
         }
 
@@ -706,7 +706,7 @@ int allocate_block(process_t *process, int size, memory_block_t *memory_head) {
 
     }
 
-    print_memory_block_list(memory_head);
+    //print_memory_block_list(memory_head);
     return 0; // Allocation failed (no suitable block found)
 
 }
@@ -721,8 +721,9 @@ void free_block(process_t *process, memory_block_t *memory_head) {
         if (current->status == ALLOCATED && strcmp(current->process_id, process->process_id) == 0) {
             // Free the block 
             current->status = FREE;
-            free(current->process_id); 
+            //free(current->process_id); 
             current->process_id = NULL;
+
 
             // Merge with previous block if its free
             if (previous != NULL && previous->status == FREE) {

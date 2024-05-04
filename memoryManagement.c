@@ -43,10 +43,10 @@ void *initialise_page_table(void) {
 int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int* total_frames_allocated, int simul_time) {
     // first check if there are enough empty frames
         // if there are enough, allocate the frames to the process  
-        // NOT enough, call LRU function and evict ALL pages from the tail of the lru list, 
-    // check again if there there are enought frames
-        // if still not enough, call LRU function again and evict ALL pages from the process at the LRU list tail again 
-    // keep doing so until there are enough free frames for the process
+        // NOT enough frames, call LRU function and evict ALL pages from the tail of the lru list, 
+            // check again if there there are enough frames
+            // if still not enough, move onto next process and evict ALL pages from the process at the LRU list tail again 
+            // keep doing so until there are enough free frames for the process
     // then allocate the frames to the process
     // update the page table and frame table and lru list, 
     // return 1 for true as all pages in the process are allocated.
@@ -54,7 +54,6 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
     int num_pages_needed = process->memory / PAGE_SIZE; // number of pages needed for the process
     int remainder = process->memory % PAGE_SIZE; // need to allocate an extra page if not enough
     num_pages_needed += remainder;
-    // printf("modulo: %d\n", process->memory % PAGE_SIZE);
 
     // printf("number of pages needed: %d\n", num_pages_needed);
 
@@ -79,7 +78,6 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
     // Loop until all needed pages are allocated 
     while (num_frames_allocated < num_pages_needed) {
         // check if there are enough free frames
-        //int num_free_frames = 0; 
         for (int i = 0; i < TOTAL_MEMORY / PAGE_SIZE; i++) {
             if (frame_table[i] == 0) {
                 num_free_frames++;
@@ -119,14 +117,9 @@ int allocate_pages(process_t *process, page_table_entry_t *page_table, int *fram
 
     update_lru(process, lru_list);
 
-    // num_free_frames + num_evicted = current number of free frames
-    // then current_number of free frames - num_pages needed  
-    //int total_num_frames_allocated = (num_free_frames + num_evicted) - num_pages_needed;
     //printf("num frames allocated to this process: %d\n", num_frames_allocated);
     *total_frames_allocated = *total_frames_allocated + num_frames_allocated;
     //printf("total num frames currently allocated: %d\n", *total_frames_allocated );
-
-    // total_frames_allocated = *total_num_frames_allocated + total_num_frames_allocated;
         
     return 1; // All pages allocated successfully. 
 }
@@ -180,6 +173,10 @@ int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *
                 //printf("%d,EVICTED,evicted-frames=[%d]\n",simul_time, frame_to_free); // CHANGE THIS PRINT STATEMENT
 
                 // Update page table
+                if (page_table[i].process_id != NULL) {
+                    free(page_table[i].process_id);
+                }
+
                 page_table[i].process_id = NULL; 
                 page_table[i].page_number = -1; 
                 page_table[i].frame_number = -1;
@@ -316,6 +313,13 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
             strcat(frame_numbers, frame_number_str);  // Append current frame number to the list
 
             frame_table[page_table[i].frame_number] = 0; // Mark frame as free
+
+            if (page_table[i].process_id != NULL) {
+                free(page_table[i].process_id);
+                page_table[i].process_id = NULL; // prevent dangling pointer
+            }
+
+
             page_table[i].process_id = NULL;  // Mark page as unallocated
             page_table[i].page_number = -1;
             page_table[i].frame_number = -1;
@@ -371,7 +375,7 @@ void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_t
 int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int* total_frames_allocated, int simul_time) {
     // first check if there are at least 4 empty frames
     // num_frames_free = 512 frames - total_frames_allocated
-        // if num_frames_free >= 4, allocate the frames to the process  (num_frames is at least 4)
+        // if num_frames_free >= 4, allocate the frames to the process (num_frames is at least 4)
         // else not enough (num_frames_free < 4)
             // we call LRU function and evict (4-x) pages out of a process
  
@@ -383,14 +387,12 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
 
 
     // think about edge case for when less than 4 pages are needed. check how many pages are needed for the process.
-    // if num_pages_needed < 4, then allocate normally
+    // if num_pages_needed < 4, then allocate all pages
 
     
     int num_pages_needed = process->memory / PAGE_SIZE; 
     int remainder = process->memory % PAGE_SIZE; // need to allocate an extra page if not enough
     num_pages_needed += remainder; // Number of pages needed for the process
-
-    //int total_pages_process = num_pages_needed; // this the the max number of pages a process can have 
 
     int num_FREE_frames = NUM_PAGES - *total_frames_allocated;
 
@@ -407,10 +409,10 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
         return 1;
     }
 
-    // Function handles edge case, if process requires less than 4 pages, and if all pages already allocated, then we can run.
+    // This statement handles edge case, if process requires less than 4 pages, and if all pages already allocated, then we can run.
     // processes with < 4 pages, all pages must be allocated 
     if ((num_pages_needed < 4) && (num_pages_already_allocated == num_pages_needed)) {
-        printf("exiting the allocate memory, already enough memory, pages < 4\n");
+        //printf("exiting the allocate memory, already enough memory, pages < 4\n");
         update_lru(process, lru_list);
         return 1; 
     }
@@ -426,29 +428,23 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
         //num_pages_needed = num_FREE_frames - num_pages_needed;
         // num to evict = 0; 
     } else if ((num_pages_already_allocated < 4) && (num_FREE_frames >= num_pages_needed)) { 
-        // If there are less than 4 pages allocated in a process but more frames than needed so no frames need to be victed. 
+        // If there are less than 4 pages allocated in a process but more frames than needed; no frames need to be evicted. 
         int curr_num_pages_needed = 4 - num_pages_already_allocated; 
-        printf("inside the else if\n");
 
-        // but if number of free frames is more than curr_num_pages_needed, then the number of pages we can allocate = num_FREE_frames - num_already_allocated
+        // If number of free frames is more than curr_num_pages_needed, then the number of pages we can allocate = num_FREE_frames - num_already_allocated
         if (num_FREE_frames > curr_num_pages_needed) {
             num_pages_needed = num_FREE_frames - num_pages_already_allocated; 
-            printf("num pages needed HERE: %d\n", num_pages_needed);
         } 
 
-        // if number of free frames is < curr_num_pages_needed, then we must evict 
-        if (num_FREE_frames < curr_num_pages_needed) {
-            num_frames_to_evict = curr_num_pages_needed - num_FREE_frames;
-        }
     } else if ((num_FREE_frames >= 4) && (num_pages_needed > num_FREE_frames)) {
-        // there are more than 4 free frmaes, but less free frames than pages needed
+        // there are more than 4 free frmaes, but less free frames than total number of pages needed
         //printf("there are more than 4 free frames, but less free frames than pages needed\n"); 
         num_pages_needed = num_FREE_frames;
     } else if ((num_pages_already_allocated < 4) && (num_FREE_frames < 4)) {
-        // number of pages we allocate is less than 4, and there are less than 4 free frames, so we need to evict 
+        // number of pages already allocated is less than 4, and there are less than 4 free frames, so we need to evict 
         num_pages_needed = 4 - num_pages_already_allocated;
 
-        // if the number of free pages is less than the number of pages we needed that we just calcualted 
+        // if the number of free pages is less than the num_pages_needed that we just calcualted 
         // e.g. 3 free frames but we need 4
         if (num_FREE_frames < num_pages_needed ) {
             num_frames_to_evict = num_pages_needed - num_FREE_frames;
@@ -456,11 +452,6 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
             // e.g. we need 4 pages, and have 4 frames 
             num_frames_to_evict = 0; 
         } 
-        // else if (num_FREE_frames > num_pages_needed) {
-        //     // e.g. we need 2 pages, 3 free frames 
-        //     num_pages_needed = 
-        // }
-        //printf("we need to evict: %d\n", num_frames_to_evict);
     }
     
 
@@ -472,7 +463,6 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
     int num_evicted = 0; // the number of frames evicted if there are not enough to allocate for process
 
     // Loop until all needed pages are allocated 
-    // loop until there are 
     while (num_frames_allocated < num_pages_needed) {
         // check if there are enough free frames
         //int num_free_frames = 0; 
@@ -491,25 +481,24 @@ int allocate_pages_virtual(process_t *process, page_table_entry_t *page_table, i
         } else {
             
             for (int frame_number = 0; frame_number < NUM_PAGES ; frame_number++) { 
-                // if num_evicted > 0 then we have to start allocating from the first frame free beginning 
 
-                if (num_evicted > 0) {
-                    if (frame_table[frame_number] == 0) {
-                        // we have a free frame, frame_number = the frame that is free so we allocate to frame that is free
-                        // allocate frame and update page table
-                        allocate_process_id_page_table(&page_table[frame_number], process); // allocate process_id at place where we are allocating frame
-                        page_table[frame_number].page_number = frame_number; // want the page num to be same as frame num
-                        page_table[frame_number].frame_number = frame_number;  // frame number where free is where we put frame number, we want to keep page table array in order of frames
-                        num_frames_allocated++;
+                // if (num_evicted > 0) {
+                //     if (frame_table[frame_number] == 0) {
+                //         // we have a free frame, frame_number = the frame that is free so we allocate to frame that is free
+                //         // allocate frame and update page table
+                //         allocate_process_id_page_table(&page_table[frame_number], process); // allocate process_id at place where we are allocating frame
+                //         page_table[frame_number].page_number = frame_number; // want the page num to be same as frame num
+                //         page_table[frame_number].frame_number = frame_number;  // frame number where free is where we put frame number, we want to keep page table array in order of frames
+                //         num_frames_allocated++;
 
-                        frame_table[frame_number] = 1; // Mark frame as occupied 
-                        if (num_frames_allocated == num_pages_needed) {
-                            break; // All pages allocated
-                        }
+                //         frame_table[frame_number] = 1; // Mark frame as occupied 
+                //         if (num_frames_allocated == num_pages_needed) {
+                //             break; // All pages allocated
+                //         }
 
-                    }
+                //     }
 
-                }
+                // }
             
 
                 // else allocate as normal
@@ -599,6 +588,10 @@ int evict_lru_pages_virtual(int num_frames_needed, page_table_entry_t *page_tabl
                 //printf("%d,EVICTED,evicted-frames=[%d]\n",simul_time, frame_to_free); // CHANGE THIS PRINT STATEMENT
 
                 // Update page table
+                if (page_table[i].process_id != NULL) {
+                    free(page_table[i].process_id);
+                }
+
                 page_table[i].process_id = NULL; 
                 page_table[i].page_number = -1; 
                 page_table[i].frame_number = -1;

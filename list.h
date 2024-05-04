@@ -1,11 +1,16 @@
 #ifndef LIST_H
 #define LIST_H
 
+#include <math.h>
+
+
 #define DEFAULT 0
 #define READY 1
 #define RUNNING 2
 #define FINISHED 3
 #define EVICTED 4
+
+
 
 typedef struct process {
     int arrival_time; // time arrived
@@ -15,7 +20,8 @@ typedef struct process {
     int state; // DEFAULT = 0, READY = 1, RUNNING = 2, FINISHED = 3, EVICTED = 4
     int time_remain; // Remaining time needed in CPU to finish
     int time_finished; // Time that the process finished (seconds)
-    
+    int memoryAllocated; // Not allocated = 0, Allocated = 1
+    int start_address;
 } process_t;
 
 
@@ -34,13 +40,7 @@ typedef struct {
     node_t *foot;
 }list_t;
 
-// typedef enum {
-//     DEFAULT = 0,
-//     READY = 1,
-//     RUNNING = 2,
-//     FINISHED = 3, 
-//     EVICTED = 4
-// } State;
+
 
 
 
@@ -88,7 +88,10 @@ void print_turnaround(list_t* process_list);
 // Print maximum and average time overhead
 void print_time_overhead(list_t* process_list);
 
-// Dividing and round up 
+// Gets the size of the head of the process queue
+int get_head_mem_size(list_t *arrived_list);
+
+// Function to perform division and always round up 
 int divide_and_round_up(int dividend, int divisor);
 
 

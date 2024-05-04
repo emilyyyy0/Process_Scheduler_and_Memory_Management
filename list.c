@@ -24,6 +24,7 @@ int is_list_empty(list_t *list) {
     return 0; // The list is not empty
 }
 
+
 // Insert a node at the foot of the linked list 
 // Inserts a new node with value "process" to the end of "list" 
 void insert_at_foot(list_t *list, process_t *process) {
@@ -67,7 +68,6 @@ void insert_at_head(list_t *list, process_t *process) {
 }
 
 
-
 // Delete the head node of the linked list 
 // Removes the first node of the list and returns the node's data (process_t)
 void *remove_head(list_t *list) {
@@ -90,16 +90,16 @@ void *remove_head(list_t *list) {
     //print_process(p);
 
     return data;
-} 
+}
 
-//free linked list
 
-//print list function 
+
+// A function to print the processes
 void print_process(process_t *process) {
     printf("process_id: %s, arrival time: %d, execution time: %d, state: %d, memory: %d, time-remaining: %d, time-finished: %d \n", process->process_id, process->arrival_time, process->execution_time, process->state, process->memory, process->time_remain, process->time_finished);
 }
 
-// Function to traverse and print the linked list
+// Function to traverse and print the process queue
 void print_list(list_t *list) {
     node_t *current = list->head; // Start from the head of the list
 
@@ -142,7 +142,7 @@ void free_list(list_t *list) {
     }
 }
 
-
+// A function to get the length of the process queue
 int len_list(list_t *list) {
     int length = 0;
 
@@ -222,10 +222,20 @@ void print_time_overhead(list_t* process_list) {
     // get rid of the rounding error
      double avg_overhead = total_time_overhead/(double)num_process;
      avg_overhead = round(avg_overhead * 100) / 100.0;
-     //printf("total_time_overhead: %.2f\n", avg_overhead);
+    
 
     printf("Time overhead %.2f %.2lf\n", maximum, avg_overhead);
 }
+
+// A function to get the size of the head of the memory list
+int get_head_mem_size(list_t *arrived_list) {
+    assert(arrived_list);
+    int size = arrived_list->head->data->memory;
+
+    assert(size);
+    
+    return size;
+} 
 
 
 // Function to perform division and always round up

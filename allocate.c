@@ -10,6 +10,7 @@
 #include "memoryManagement.h"
 
 
+
 int main(int argc, char **argv) {
     
     char *filename; // path to file
@@ -38,6 +39,9 @@ int main(int argc, char **argv) {
 
     // List of completed processes
     list_t* complete_list = make_empty_list();
+
+    // List for memory blocks in task 2
+    m_list_t* memory_list = make_memory_list();
 
     // Read in the file from stdin
     FILE *file = fopen(filename, "r");
@@ -96,16 +100,18 @@ int main(int argc, char **argv) {
     if (strcmp(memory_strat, INFINITE) == 0) {
         infinite(process_list, arrived_list, complete_list, quantum);
     } else if (strcmp(memory_strat, FIRST_FIT) == 0) {
-        first_fit();
+        first_fit(process_list, arrived_list, complete_list, memory_list, quantum);
     } else if (strcmp(memory_strat, PAGED ) == 0) {
         paged(process_list, arrived_list, complete_list, quantum);
-    }
-    else if (strcmp(memory_strat, VIRTUAL) == 0) {
+    } else if (strcmp(memory_strat, VIRTUAL) == 0) {
         virtual(process_list, arrived_list, complete_list, quantum);
     }
 
 
-
+    free_list(process_list);
+    free_list(arrived_list);
+    free_list(complete_list);
+    free_memory_list(memory_list);
 
     return 0;
 }
@@ -121,3 +127,10 @@ int main(int argc, char **argv) {
 
 
 //
+
+
+
+
+
+
+

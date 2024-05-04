@@ -22,10 +22,13 @@ void initialise_frame_table(int *frame_table);
 // Function to initialise page table
 void *initialise_page_table(void);
 
+// A function to allocate pages to the page table
 int allocate_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lry_list, int* total_frames_allocated, int simul_time);
 
+// Evict function to evict stored pages using LRU
 int evict_lru_pages(int num_frames_needed, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time);
 
+// A function that frees the pages from the page table
 void free_pages(process_t *process, page_table_entry_t *page_table, int *frame_table, list_t *lru_list, int simul_time, int* frames_allocated);
 
 // Allocate pages for virtual - Task 4

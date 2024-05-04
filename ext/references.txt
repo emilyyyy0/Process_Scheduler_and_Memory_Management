@@ -1,0 +1,9 @@
+-----------------------------REFERENCES------------------------------------
+
+[1] Nir Lipovetzky, Lars Kulik, "Algorithms & Data Structures W3.8: Polymorphic Linked List Implementation", 
+Algorithms & Data Structures COMP20003, 2023.
+- We used some of the structs for linked list nodes and the list itself exactly or inspiration
+- for implementing our data structures (e.g. process queue) with a linked list.
+- We also used the methods like listCreate() and listPrepend() as inspiration or
+- a guideline for our linked list functions.
+- A copy of the original external source code is stored in the file "ADS_LL"
